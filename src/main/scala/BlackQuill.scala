@@ -30,7 +30,7 @@ object BlackQuill{
 
   val description = "Welcome to BlackQuill.\n" +
     "BQ switches=> \n" + options +
-    "Please see also... \n" +
+    "\nPlease see also... \n" +
     wiki + syntax + "\n" +
     wiki + philosophy + "\n" 
 
@@ -52,6 +52,18 @@ object BlackQuill{
     def setEncoding(b:Boolean,enc:String){encFlag=b;encode = enc}
     def getEncoding{encode}
 
+    def init{
+      inputFile = ""
+      force = false
+      stdout = false
+      stdin = false
+      output = false
+      dirName = ""
+      verbose = false
+      encFlag = false
+      encode = "UTF-8"
+    }
+
     private
     var inputFile = ""
     var force = false
@@ -67,37 +79,37 @@ object BlackQuill{
     var encFlag = false
     var encode = "UTF-8"
 
+
   }
 
   def main(args:Array[String]){
-
-    val f : Regex = """(.+)\s(.+)""".r 
     val sufRegex = """(\.md$)|(\.markdown$)|(\.txt$)|(\.bq$)|(\.blackquill$)""".r
 
     try{
-      args.foreach({s =>
-        println("=>" + s)
-        s match {
+      val it = args.iterator
+      for(elem <- it){
+        println("=>" + elem.toString)
+        elem.toString() match {
           case "--force"|"-f" => Switches.setForce(true)
           case "--stdout"|"-s" => Switches.setStdout(true)
-          case f("--enc",v) => Switches.setEncoding(true,v)
-          case f("--output",v) => Switches.setOutput(true,v)
+          case "--enc" => Switches.setEncoding(true,it.next.toString)
+          case "--output" => Switches.setOutput(true,it.next.toString)
           case "--verbose"|"-v" => Switches.setVerbose(true)
           case "--version" => println("BlackQuill Version" + VERSION + " updated at " + lastDate)
           case "--help"|"-h" =>
             println(description)
           case _ => 
-            if(sufRegex.findFirstIn(s) != None){
-              Switches.setInputfile(s)
+            if(sufRegex.findFirstIn(elem.toString) != None){
+              Switches.setInputfile(elem.toString)
             }else{
               throw new RuntimeException
             }
         }
-      })
+      }
     }catch{ case e:Exception => println("wrong switch is found see --help or Website\n" + wiki)}
   }
 
-  
+
 }
 
 
