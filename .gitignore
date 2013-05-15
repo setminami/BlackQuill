@@ -4,3 +4,4 @@ project/target/config-classes
 .DS_Store
 .ensime
 .ensime_lucene
+.history

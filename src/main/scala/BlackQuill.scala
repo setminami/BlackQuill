@@ -1,13 +1,18 @@
 package org.blackquill
 
-// BlackQuill Copyright (C) 2013 set.minami<set,minami@gmail.com>
+// BlackQuill Copyright (C) 2013 set.minami<set.minami@gmail.com>
 // Lisence MIT see also LISENCE.txt
 // Main object and set Switches.
 
 import scala.collection.JavaConversions._
 import scala.util.matching._
+import org.apache.commons.logging._
+
+import org.blackquil.fileio._
 
 object BlackQuill{
+  private val log:Log = LogFactory.getLog(BlackQuill.getClass)
+
   val VERSION = "0.1.0"
   val lastDate = "May 14 2013"
 
@@ -19,7 +24,6 @@ object BlackQuill{
     "--force|-f : Force conversion. BQ ignore timestamps of markdown files.\n" +
     "--stdout|-s :BQ outputs document to STDOUT as HTML.\n" + 
     "--enc shift-jis|euc-jp|UTF-8|ASCII default input enc is UTF-8\n" +
-    "- : BQ accept markdown document from STDIN\n"  +
     "--output DIR|-o :BQ outputs HTML to under DIR\n" +
     "--verbose|-v :output conversion processes verbosely \n" +
     "--version :output version and so on.\n" + 
@@ -36,21 +40,22 @@ object BlackQuill{
 
   object Switches{
     def setInputfile(input:String){inputFile = input}
-    def getInputfile{inputFile}
+    def getInputfile:String={inputFile}
 
     def setForce(b:Boolean){force = b}
-    def getForce{force}
+    def getForce:Boolean={force}
     def setStdout(b:Boolean){stdout = b}
-    def getStdout{stdout}
+    def getStdout:Boolean={stdout}
     def setStdin(b:Boolean){stdin = b}
-    def getStdin{stdin}
+    def getStdin:Boolean={stdin}
     def setOutput(b:Boolean,dir:String){output = b;dirName = dir}
-    def getOutput{output}
-    def getOutputDir{dirName}
+    def getOutput:Boolean={output}
+    def getOutputDir:String={dirName}
     def setVerbose(b:Boolean){verbose = b}
-    def getVerbose{verbose}
+    def getVerbose:Boolean={verbose}
     def setEncoding(b:Boolean,enc:String){encFlag=b;encode = enc}
-    def getEncoding{encode}
+    def getEncFlag:Boolean={encFlag}
+    def getEncoding:String={encode}
 
     def init{
       inputFile = ""
@@ -88,14 +93,14 @@ object BlackQuill{
     try{
       val it = args.iterator
       for(elem <- it){
-        println("=>" + elem.toString)
+        log.debug("=>" + elem.toString)
         elem.toString() match {
           case "--force"|"-f" => Switches.setForce(true)
           case "--stdout"|"-s" => Switches.setStdout(true)
           case "--enc" => Switches.setEncoding(true,it.next.toString)
           case "--output" => Switches.setOutput(true,it.next.toString)
           case "--verbose"|"-v" => Switches.setVerbose(true)
-          case "--version" => println("BlackQuill Version" + VERSION + " updated at " + lastDate)
+          case "--version" => log.info("BlackQuill Version" + VERSION + " updated at " + lastDate)
           case "--help"|"-h" =>
             println(description)
           case _ => 
@@ -106,11 +111,15 @@ object BlackQuill{
             }
         }
       }
-    }catch{ case e:Exception => println("wrong switch is found see --help or Website\n" + wiki)}
+    }catch{ case e:Exception => log.warn("wrong switch is found see --help or Website\n" + wiki)}
+    val fileHandler = new FileIO
+    // - fileHandler.openMarkdownFromString(str:String)
+    val text = fileHandler.openMarkdownFromFile(Switches.getInputfile)
   }
 
 
 }
+
 
 
 

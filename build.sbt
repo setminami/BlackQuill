@@ -9,6 +9,7 @@ scalacOptions ++= Seq("-encoding","UTF-8")
 libraryDependencies ++= Seq(
 	"org.apache.commons" % "commons-lang3" % "3.1",
 	"commons-io" % "commons-io" % "2.4",
+        "commons-logging" % "commons-logging" % "1.0.4",
 	"org.specs2" %% "specs2" % "1.12.3" % "test"
 )
 
