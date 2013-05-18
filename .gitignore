@@ -7,4 +7,5 @@ project/target/config-classes
 .history
 .project
 .classpath
-
+.cache
+.settings
