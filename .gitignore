@@ -5,3 +5,6 @@ project/target/config-classes
 .ensime
 .ensime_lucene
 .history
+.project
+.classpath
+

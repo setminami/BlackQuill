@@ -1,0 +1,3 @@
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+bbbbbb<LINK>aaaa->aaaaaa</LINK>cccccc
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

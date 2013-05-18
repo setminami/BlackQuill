@@ -13,6 +13,7 @@ libraryDependencies ++= Seq(
         "uk.ac.ed.ph.snuggletex"%"snuggletex-core" % "1.2.2",
         "uk.ac.ed.ph.snuggletex"%"snuggletex-upconversion"  %"1.2.2",
         "uk.ac.ed.ph.snuggletex"%"snuggletex-jeuclid" % "1.2.2",
+        "com.tristanhunt" %% "knockoff" % "0.8.1" ,
 	"org.specs2" %% "specs2" % "1.12.3" % "test"
 )
 
