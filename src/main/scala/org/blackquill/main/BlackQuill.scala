@@ -1,10 +1,11 @@
 package org.blackquill.main
 
 // BlackQuill Copyright (C) 2013 set.minami<set.minami@gmail.com>
-// Lisence MIT see also LISENCE.txt
+// License MIT see also LISENCE.txt
 // Main object and set Switches.
 
 import scala.collection.JavaConversions._
+import scala.xml._
 import scala.util.matching._
 import org.apache.commons.logging._
 import org.blackquill.engine._
@@ -116,12 +117,14 @@ object BlackQuill{
     // - fileHandler.openMarkdownFromString(str:String)
     val text:List[String] = fileHandler openMarkdownFromFile(Switches.getInputfile)
     val output = blackquill(text)
+    log info output
   }
 
   def blackquill(lines:List[String]):List[String] = {
     val str = new HTMLMap htmlTAGFilter lines.mkString("\\,")
-    log info str
-    str split '\n' toList
+    val parsed = new BQParser
+    log info parsed.toHTML(str)
+     str split """\\,""" toList
   }
 
 }
