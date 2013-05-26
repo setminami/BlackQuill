@@ -7,6 +7,9 @@ package org.blackquill.engine
 import org.apache.commons.logging._
 import scala.collection.immutable.List
 import scala.collection.mutable.LinkedHashMap
+import scala.collection.mutable.Stack
+import scala.collection.mutable.ListMap
+import scala.collection.SortedSet
 import scala.util.matching.Regex
 import scala.xml._
 
@@ -16,97 +19,121 @@ class BQParser {
 	private val log:Log = LogFactory.getLog(classOf[BQParser])
 
 	private val Syntax = LinkedHashMap(
-	"^(.*?)((\\s*\\*\\s.+?\\\\,)+)(.*?)$$" -> ("ul",surroundByListTAG _),
-	"^(.*?)\\*(.+?)\\*(.*?)$$" -> ("i",surroundByAbstructTAG _),
-	"^(.*?)\\*\\*(.+?)\\*\\*(.*?)$$" -> ("em",surroundByAbstructTAG _),
+	"^(.*?)((\\s+\\d+?\\.\\s.+?\\\\,\\s*?)+)\\\\,\\s*?(.*?)$$" -> ("ol",surroundByListTAG _),
+	"^(.*?)((\\s+[\\*|\\+|\\-]\\s.+?\\\\,\\s*?)+)\\\\,\\s*?(.*?)$$" -> ("ul",surroundByListTAG _),
+	"^(.*?)\\*(.+?)\\*(.*?)$$" -> ("i",surroundByGeneralTAG _),
+	"^(.*?)\\*\\*(.+?)\\*\\*(.*?)$$" -> ("em",surroundByGeneralTAG _),
 	"^(.*?)(#+)\\s(.+?)\\\\,(.*?)$$" -> ("h",surroundByHeadTAG _)
 	//"^(.*?)(\\\\,.+?\\\\,)(.*?)$$" -> ("p",surroundByAbstructTAG _)
 	)
 
-/*
-	private def controlStyle(style:List[String]):String = {
-	  if(style.size == 0){
-		  log warn "<ul> style: too many nests found where listed by by *"
-		  System.exit(-1)
-		  return ""
-	  }else{return style.head}
+/*	private def ulStyles(index:Int):String =  {
+
+    }
+
+	private def olStyles(index:Int):String = 
 	}
 */
 	private def surroundByListTAG(doc:String, regex:String, TAG:String):String = {
-		var styles = List[String]()
+		val p = new Regex(regex, "before","elements","element","following")
+	  	val m = p findFirstMatchIn(doc)
+		var s = ""
+		var bef = ""
+		var fol = ""
+
+	  	if(m != None){
+  			if(m.get.group("before") != None){bef = m.get.group("before")}else{bef = ""}
+  			if(m.get.group("following") != None){fol = m.get.group("following")}else{fol = ""}
+			s = m.get.group("elements")
+	  	}else{
+	  	  return doc
+	  	}
+
+		
 		var sign = ""
 		var sp = ""
-		val ulStyles = List[String]("disc","disc","disc","circle","circle","circle","square","square","square")
-		val olStyles = List[String]("disc","circle","square")	  
+		val indentWidth = 4
+		var styles:((Int) => String) = null
+		
 	  	TAG match{
 	      case "ul"=>
 	        sp = TAG
-	        styles = ulStyles
-	        sign = "*"
+	        styles = (index:Int) => {
+	          	  (index/indentWidth)%3 match{
+	          	  	case 1 => "disc"
+	          	  	case 2 => "circle"
+	          	  	case 0 => "square"
+	          	  	case _ => "---"
+	          	  }
+	        }
+	        sign = "[\\*|\\+|\\-]"
 	      case "ol"=>
 	        sp = TAG
-	        styles = olStyles
-	        sign = "-"
+	        styles = (index:Int) => {
+	        	  (index/indentWidth)%4 match{
+	        	    case 1 => "decimal"
+	        	    case 2 => "decimal-leading-zero"
+	        	    case 3 => "upper-latin"
+	        	    case 0 => "lower-latin"	        	    
+	        	    case _ => "---"
+	        	  }
+	        }
+	        sign = "\\d+?\\."
 	    }
-		var tree = new TreeNode[String]("root")
-
-	  	def _surroundByListTAG(doc:String, regex:String, TAG:String, style:List[String],indent:Int):String = {
-	  		if(doc == ""){return ""}
-	  		if(style.size == 0){
-	  		    log warn s"<$sp> style: too many nests or wrong notation found where listing by $sp"
-	  		    System.exit(-1)
-	  		    return ""
-	  		}
 		
-	  		val p = new Regex(regex, "before","elements","element","following")
-	  		val m = p findFirstMatchIn(doc)
-	  		if(m != None){
-	  			var bef = ""
-	  			var fol = ""
+		var docList = List[String]()
+		for(elem <- s"""(\\s+?$sign\\s.+?\\\\,)+?""".r.findAllMatchIn(s)){				 
+			docList = elem.group(1)::docList
+		}
 
-	  			if(m.get.group("before") != None){bef = m.get.group("before")}else{bef = ""}
-	  			if(m.get.group("following") != None){fol = m.get.group("following")}else{fol = ""}
-				val s = m.get.group("elements")
-				log info s			
-				
-				var str = ""
-				var i = indent
-				var list = List.empty[Tuple3[String,Int,String]]
-				for(elem <- s"""((\\s*?)\\$sign\\s(.+?)\\\\,)+?""".r.findAllMatchIn(s)){
-				  list = (elem.group(1),elem.group(2).size,elem.group(3))::list
-				}
-				var indents = 0
-				for(elem <- list.reverse){
-				  if(elem._2 != indents){indents = elem._2}
-				  if(indents == i){
-					log info elem._1 + ":" + indents + ":" + elem._3
-				    str += s"<$TAG>" + elem._3 + s"</$TAG>\\,"
-				    log info "^^^" + elem._1
-				    tree.add(new TreeNode[String](str))
-				    //_surroundByUlListTAG(elem.group("following"),regex,TAG,style.tail,i)
-				  }else if(indents > i){
-					str += _surroundByListTAG(elem._1,regex,TAG,style.tail,indents)
-					log info "%%%" + str
-					tree.add(new TreeNode[String](str))
-				  }else if(indents < i){
-				    str += _surroundByListTAG(elem._1,regex,TAG,style,indents)
-					log info "&&&" + str
-					tree.add(new TreeNode[String](str))
-				  }
-				  i = indents
-				}
-				
-				val ST:String = style.head
-				log info "---->"  
-				for(node <- tree) log info node
-				return _surroundByListTAG(bef,regex,TAG,style,0) +
-						s"""<$sp style=\"list-style-type:$ST\">""" + str + s"""</$sp>\\,""" +
-						_surroundByListTAG(fol,regex,TAG,style,0)						
 
+		
+	  	def _surroundByListTAG(doc:List[String],TAG:String,indent:Int):TreeNode[String] = {	
+	  		var tree = new TreeNode[String]("")
+	  	    if(doc.isEmpty){return tree}	  	  		  		
+	  	
+	  		tree.add(new TreeNode("<" + sp + s""" style=\"list-style-type:${styles(indent)}\">"""))
+				  			  		var i = indent
+			var list = List.empty[Tuple3[String,Int,String]]
+	  		for(elem <- doc){
+	  		  val m = s"""((\\s+?)$sign\\s(.+?)\\\\,)""".r.findFirstMatchIn(elem)
+	  		  list = (m.get.group(1),m.get.group(2).size,m.get.group(3))::list
+	  		}
+
+			var restStr = List[String]()
+			if(list.isEmpty){return new TreeNode("")
+	  		}else{for(e <- list.reverse.tail){restStr = e._1::restStr}}
+			
+			restStr = restStr.reverse
+			for(elem <- list.reverse){			
+				if(elem._2 > i){			   
+					tree.add(new TreeNode("<" + sp + s""" style=\"list-style-type:${styles(elem._2)}\">"""))
+				}else if(elem._2 < i){					
+					tree.add(new TreeNode[String](s"</$sp>"*((i - elem._2)/indentWidth)))
+				}
+				tree.add(new TreeNode[String](s"<$TAG>" + elem._3 + s"</$TAG>\\,"))	
+				
+				
+				if(restStr.isEmpty){
+					restStr = List[String]("")				  
+				}else{
+					restStr = restStr.tail
+				}
+				i = elem._2
 			}
-	  		doc
-		  }
-	  	_surroundByListTAG(doc,regex,"li",styles,0)
+		tree.add(new TreeNode(s"</$sp>"*((i - indent)/indentWidth + 1)))
+  		return tree
+	  }
+	  	val r = s"""^(\\s*)${sign}.*?$$""".r("firstSpace")
+	  	val wS = r.findFirstMatchIn(s)
+	  	var str = ""
+	  	 
+	  	if(wS != None){
+	  		for(e <- _surroundByListTAG(docList.reverse,"li",wS.get.group("firstSpace").size)){
+	  		  str += e.toString()
+	  	}
+	  	  surroundByListTAG(bef,regex,TAG) + str + surroundByListTAG(fol,regex,TAG)
+	  	}else{doc}
 	}
 	
 	private def surroundByHeadTAG(doc:String, regex:String, TAG:String):String = {
@@ -130,7 +157,7 @@ class BQParser {
 	  doc
 	}
 	
-	private def surroundByAbstructTAG(doc:String, regex:String, TAG:String):String = {
+	private def surroundByGeneralTAG(doc:String, regex:String, TAG:String):String = {
 	  if(doc == ""){return doc}
 	  log debug doc
 	  val p = new Regex(regex,"before","inTAG","following")
@@ -140,9 +167,9 @@ class BQParser {
 	      var fol = ""
 		  if(m.get.group("before") != None){bef = m.get.group("before")}else{bef = ""}
 	      if(m.get.group("following") != None){fol = m.get.group("following")}else{fol = ""}
-		  return surroundByAbstructTAG(bef,regex,TAG) + 
+		  return surroundByGeneralTAG(bef,regex,TAG) + 
 				  s"<${TAG}>" + m.get.group("inTAG") + s"</${TAG}>" +
-	    		  surroundByAbstructTAG(fol,regex,TAG)
+	    		  surroundByGeneralTAG(fol,regex,TAG)
 	  }
 	  doc
 	}

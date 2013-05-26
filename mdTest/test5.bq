@@ -11,13 +11,46 @@ bbbbb<-testccccccc
 コメント
 -->
 *AAA*
-* abc
-  * ABC
-    * DE
-* def
-  * ABC
-  * CDE
-* ghi
+    * abc
+        * ABC
+        * DEFFF
+    * def
+        * ABCCC
+        * CDE
+    * ghi
+
+    - A
+        - B
+            - C
+    - D
+
+    + AA
+        + BB
+            + CC
+        + DD
+
+    * AAA
+        + BBB
+        + CCC
+            - DDD
+            - EEE
+
+    * A
+        * B
+            * C
+            * D
+                * E
+                    * F
+    * G
+
+
+    1. A
+    2. B
+        3. C
+        4. D
+            5. E
+                6. F
+    7. G
 
 <h1>aaaaa</h1>
 あああ
