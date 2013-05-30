@@ -94,13 +94,13 @@ class HTMLMap{
 )
 
   private val specialChar = LinkedHashMap(
-    """\-\-""".r -> "&mdash;","""<=""".r -> "&hArr;","""<\->""".r -> "&harr;","""\->""".r ->"&rarr;","""<\-""".r ->"&larr;",
-    """=>""".r -> "&rArr;","""<=""".r -> "&lArr;","""\|\|^""".r -> "&uArr;",
-    """\|\|/""".r -> "&dArr;","""\|/""".r -> "&darr;","""\|^""".r -> "&uarr;","""\+\_""".r -> "&plusmn;","""!=""".r -> "&ne;",
+    """[^\-]\-\-[^\-+]""".r -> "&mdash;","""<=""".r -> "&hArr;","""<\->""".r -> "&harr;","""\->""".r ->"&rarr;","""<\-""".r ->"&larr;",
+    """=>""".r -> "&rArr;","""<=""".r -> "&lArr;","""\|\|\^""".r -> "&uArr;",
+    """\|\|/""".r -> "&dArr;","""\|/""".r -> "&darr;","""\|\^""".r -> "&uarr;","""\+\_""".r -> "&plusmn;","""!=""".r -> "&ne;",
     """~=""".r -> "&cong;","""<\_""".r -> "&le;",""">\_""".r -> "&ge","""\|FA""".r -> "&forall;","""\|EX""".r -> "&exist;",
     """\|=""".r -> "&equiv;","""\(\+\)""".r -> "&oplus;","""\(\-\)""".r -> "&ominus;","""\(X\)""".r -> "&otimes;",
     """\(c\)""".r -> "&copy;","""\(R\)""".r ->"&reg;","""\(SS\)""".r -> "&sect;","""\(TM\)""".r -> "&trade;",
-    """!in""".r -> "&notin;", """<""".r->"&lt;",""">""".r->"&gt;")
+    """!in""".r -> "&notin;", """<""".r->"&lt;","""[^\\,|^>+]>""".r->"&gt;")
 
   private def passThrough(text:String):String = {text}
   private def specialCharConvert(text:String):String = {
