@@ -21,8 +21,8 @@ class BQParser {
 	private val Syntax = LinkedHashMap(
 	"^(.*?\\\\,)((>.*?\\\\,)+?)\\\\,(.*?)$$" -> ("blockquote",surroundByBlockquoteTAG _),
 	"^(.*?\\\\,)>(.*?)\\\\,\\\\,(.*?)$$" -> ("blockquote",surroundByGeneralTAG _),
-	"^(.*?)((\\s+\\d+?\\.\\s.+?\\\\,\\s*?)+?)(.*?)$$" -> ("ol",surroundByListTAG _),
-	"^(.*?)((\\s+(?:\\*|\\+|\\-)\\s.+?\\\\,\\s*?)+?)(.*?)$$" -> ("ul",surroundByListTAG _),
+	"^(.*?)((\\s+\\d+?\\.\\s.+?\\\\,)+)(.*?)$$" -> ("ol",surroundByListTAG _),
+	"^(.*?)((\\s+(?:\\*|\\+|\\-)\\s.+?\\\\,)+)(.*?)$$" -> ("ul",surroundByListTAG _),
 	"^(.*?)\\*\\*(.+?)\\*\\*(.*?)$$" -> ("em",surroundByGeneralTAG _),
 	"^(.*?)\\*(.+?)\\*(.*?)$$" -> ("i",surroundByGeneralTAG _),
 	"^(.*\\\\,)(.*?)\\\\,(\\-+|=+)\\s*\\\\,(.*)$$" -> ("h",surroundByHeadTAGUnderlineStyle _),
@@ -108,6 +108,7 @@ class BQParser {
 	        sign = "\\d+?\\."
 	    }
 		
+		log info ":::" + s
 		var docList = List[String]()
 		for(elem <- s"""(\\s+?$sign\\s.+?\\\\,)+?""".r.findAllMatchIn(s)){				 
 			docList = elem.group(1)::docList
@@ -118,9 +119,10 @@ class BQParser {
 	  	def _surroundByListTAG(doc:List[String],TAG:String,indent:Int):TreeNode[String] = {	
 	  		var tree = new TreeNode[String]("")
 	  	    if(doc.isEmpty){return tree}	  	  		  		
-	  	
+	  		
+	  		log info "====>" + doc
 	  		tree.add(new TreeNode("<" + sp + s""" style=\"list-style-type:${styles(indent)}\">"""))
-				  			  		var i = indent
+			var i = indent
 			var list = List.empty[Tuple3[String,Int,String]]
 	  		for(elem <- doc){
 	  		  val m = s"""((\\s+?)$sign\\s(.+?)\\,)""".r.findFirstMatchIn(elem)
@@ -151,12 +153,13 @@ class BQParser {
 		tree.add(new TreeNode(s"</$sp>"*((i - indent)/indentWidth + 1)))
   		return tree
 	  }
-	  	val r1 = s"""(\\s*)${sign}.*?\\,""".r
+	  	
+	  	log info "->" + docList
+	  	val r1 = s"""(\\s*)${sign}.*?\\\\,""".r
 	  	val wS1 = r1.findFirstMatchIn(s)
 	  	var str = ""
 	  	val r2 = s"""(\\s*)${sign}.*(\\\\,<br />.*?</blockquote>\\\\,)""".r
 	  	val wS2 = r2.findFirstMatchIn(s)
-	  	log debug "===>" + s
 	  	
 	  	var wS:Option[Regex.Match] = null
 	  	if(wS2 != None){wS = wS2}else if(wS1 != None){wS = wS1}
@@ -166,7 +169,7 @@ class BQParser {
 	  		}
 	  	  if(wS == wS2){str += wS.get.group(2)}
 	  	  
-	  	  log debug "---->" + str
+	  	  log info "!---->" + str
 	  	  surroundByListTAG(bef,regex,TAG) + str + surroundByListTAG(fol,regex,TAG)
 	  	}else{doc}
 	}
