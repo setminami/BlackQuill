@@ -19,8 +19,9 @@ class BQParser {
 	private val log:Log = LogFactory.getLog(classOf[BQParser])
 
 	private val Syntax = LinkedHashMap(
-	"^(.*?\\\\,)((>.*?\\\\,)+?)\\\\,(.*?)$$" -> ("blockquote",surroundByBlockquoteTAG _),
-	"^(.*?\\\\,)>(.*?)\\\\,\\\\,(.*?)$$" -> ("blockquote",surroundByGeneralTAG _),
+	//"^()((>.*?\\\\,)+?)\\\\,(.*?)$$" -> ("blockquote",surroundByBlockquoteTAG _),	    
+	"^(.*?\\\\,)((>.*?\\\\,)+?)(\\\\,.*?)$$" -> ("blockquote",surroundByBlockquoteTAG _),
+	//"^(.*?\\\\,)>(.*?)\\\\,\\\\,(.*?)$$" -> ("blockquote",surroundByGeneralTAG _),
 	"^(.*?)((\\s+\\d+?\\.\\s.+?\\\\,)+)(.*?)$$" -> ("ol",surroundByListTAG _),
 	"^(.*?)((\\s+(?:\\*|\\+|\\-)\\s.+?\\\\,)+)(.*?)$$" -> ("ul",surroundByListTAG _),
 	"^(.*?)\\*\\*(.+?)\\*\\*(.*?)$$" -> ("em",surroundByGeneralTAG _),
@@ -33,30 +34,47 @@ class BQParser {
 	private def surroundByBlockquoteTAG(doc:String, regex:String, TAG:String):String = {
 	  val p = new Regex(regex, "before","inTAG","midInTag","following")
 	  val m = p findFirstMatchIn(doc)
-	  
+	  log info "[" + doc + "]"
+	  	
 	  var bef = ""
 	  var fol = ""
 	  var contentStr = ""
 	  if(m != None){
-	    val mid = m.get.group("inTAG")
+	    var mid = m.get.group("inTAG")
 	    log info "***-->" + mid
 
-	    if(m.get.group("before") != None){bef = m.get.group("before")}else{bef = ""}
+	    if(m.get.group("before") != None){
+	      bef = m.get.group("before")
+	      if(bef.startsWith(">")){
+	        mid = bef + mid
+	        bef = ""
+	      }
+	    }else{bef = ""}
   		if(m.get.group("following") != None){fol = m.get.group("following")}else{fol = ""}
   		
   		log info "=>" + mid
-		if(mid != ""){
-		  val mat = """(>(.+?\\,))+?""".r.findAllMatchIn(mid)
+		if(mid != null){
+		  val mat = """(.+?\\,)+?""".r.findAllMatchIn(mid)
+		  
+		  var inCurrentBQ = true
 		  
 		  for(mt <- mat){
-		    contentStr += mt.group(2)
+		    if(!mt.group(1).startsWith(">")||mt.group(1) == "\\\\,"){
+		    	inCurrentBQ = false
+		    }
+		    if(inCurrentBQ){
+		      contentStr += mt.group(1).tail
+		    }else{
+		      log info "(" + mt.group(1) + ")"
+		      fol += mt.group(1)}		    
 		    log info "^^^" + mt
 		  }
 		}
-
+  		log info "bef=" + bef + " mid=" + contentStr + " fol="  + fol 
 		log info "-->" + contentStr
 		return surroundByBlockquoteTAG(bef, regex, TAG) + 
-				"<blockquote>" + contentStr + "</blockquote>" + surroundByBlockquoteTAG(fol, regex, TAG)
+				s"<$TAG>\\," + surroundByBlockquoteTAG(contentStr, regex, TAG) + s"</$TAG>\\," +
+				surroundByBlockquoteTAG(fol, regex, TAG)
 	  }
 	  doc
 	}
@@ -108,7 +126,7 @@ class BQParser {
 	        sign = "\\d+?\\."
 	    }
 		
-		log info ":::" + s
+		log debug ":::" + s
 		var docList = List[String]()
 		for(elem <- s"""(\\s+?$sign\\s.+?\\\\,)+?""".r.findAllMatchIn(s)){				 
 			docList = elem.group(1)::docList
@@ -120,7 +138,7 @@ class BQParser {
 	  		var tree = new TreeNode[String]("")
 	  	    if(doc.isEmpty){return tree}	  	  		  		
 	  		
-	  		log info "====>" + doc
+	  		log debug "====>" + doc
 	  		tree.add(new TreeNode("<" + sp + s""" style=\"list-style-type:${styles(indent)}\">"""))
 			var i = indent
 			var list = List.empty[Tuple3[String,Int,String]]
@@ -154,7 +172,7 @@ class BQParser {
   		return tree
 	  }
 	  	
-	  	log info "->" + docList
+	  	log debug "->" + docList
 	  	val r1 = s"""(\\s*)${sign}.*?\\\\,""".r
 	  	val wS1 = r1.findFirstMatchIn(s)
 	  	var str = ""
@@ -169,7 +187,7 @@ class BQParser {
 	  		}
 	  	  if(wS == wS2){str += wS.get.group(2)}
 	  	  
-	  	  log info "!---->" + str
+	  	  log debug "!---->" + str
 	  	  surroundByListTAG(bef,regex,TAG) + str + surroundByListTAG(fol,regex,TAG)
 	  	}else{doc}
 	}

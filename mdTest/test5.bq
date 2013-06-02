@@ -8,7 +8,7 @@ bbbbb<-testccccccc
 ### TITLE2
 <link href="test->test" />
 <!-- これはコメント -->
-<link href="test2->test2" />
+<link href="test2-test2" />
 <!-- これも
 コメント
 -->
@@ -54,12 +54,11 @@ bbbbb<-testccccccc
                 6. F
     7. G
     
- * A
- * B
-  * C
-  * D
-   * E
-
+    * A
+    * B
+        * C
+        * D
+    * E
 ### aaaaa ###
 # aaa1
 # aaa2 #
@@ -69,42 +68,34 @@ bbbbb<-testccccccc
 # aaa ##
 aaa5
 ---
-
-
 >abc
 >def
 
 >abc
 >ghi
-
+aaa
 >abc
 >jkl
 mno
-
 >abc *def*
 >ghi **jkl**
 >mno
 
 >abc
->
 >    * def
 >    * ghi
 >jkl
-
 aaaaaaaaaaaaaaaaaaaaa
 aaaaaaaaaaaaaaaa
 aaaaaaaaaaa
 > bbb
-
 cccccccccccccc
 cccccccccccccccc
 ccccccccccc
-
 >aaa
 >bbb
-
-<!-- >>ccc
+>>ccc
 >>ddd 
->eee -->
+>eee
 
 あああ
