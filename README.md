@@ -3,4 +3,4 @@
 <br />
 <br />
 <br />
-![planAndProceed](./planAndProceed.png)
+![planAndProceed](./planAndproceed.png)
