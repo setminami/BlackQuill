@@ -117,7 +117,7 @@ object BlackQuill{
     // - fileHandler.openMarkdownFromString(str:String)
     val text:List[String] = fileHandler openMarkdownFromFile(Switches.getInputfile)
     val output = blackquill(text)
-    log info output
+  //  log info output
   }
 
   def blackquill(lines:List[String]):List[String] = {

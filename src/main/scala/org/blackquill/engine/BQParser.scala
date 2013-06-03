@@ -19,18 +19,29 @@ class BQParser {
 	private val log:Log = LogFactory.getLog(classOf[BQParser])
 
 	private val Syntax = LinkedHashMap(
-	//"^()((>.*?\\\\,)+?)\\\\,(.*?)$$" -> ("blockquote",surroundByBlockquoteTAG _),	    
-	"^(.*?\\\\,)((>.*?\\\\,)+?)(\\\\,.*?)$$" -> ("blockquote",surroundByBlockquoteTAG _),
-	//"^(.*?\\\\,)>(.*?)\\\\,\\\\,(.*?)$$" -> ("blockquote",surroundByGeneralTAG _),
+	"^(.*?\\\\,)((>.*(?:\\\\,))+?)(.*?)$$" -> ("blockquote",surroundByBlockquoteTAG _),
 	"^(.*?)((\\s+\\d+?\\.\\s.+?\\\\,)+)(.*?)$$" -> ("ol",surroundByListTAG _),
 	"^(.*?)((\\s+(?:\\*|\\+|\\-)\\s.+?\\\\,)+)(.*?)$$" -> ("ul",surroundByListTAG _),
-	"^(.*?)\\*\\*(.+?)\\*\\*(.*?)$$" -> ("em",surroundByGeneralTAG _),
-	"^(.*?)\\*(.+?)\\*(.*?)$$" -> ("i",surroundByGeneralTAG _),
-	"^(.*\\\\,)(.*?)\\\\,(\\-+|=+)\\s*\\\\,(.*)$$" -> ("h",surroundByHeadTAGUnderlineStyle _),
-	"^(.*?)(#{1,6})\\s(.+?)(\\s#{1,6}?){0,1}\\\\,(.*?)$$" -> ("h",surroundByHeadTAG _)
+	"^(.*?)\\*\\*(.+?)\\*\\*(.*?)$$" -> ("strong",surroundByGeneralTAG _),
+	"^(.*?)\\*(.+?)\\*(.*?)$$" -> ("em",surroundByGeneralTAG _),
+	"^(.*?)(#{1,6})\\s(.+?)(\\s#{1,6}?)??\\\\,(.*?)$$" -> ("h",surroundByHeadTAG _),
+	"^(.*\\\\,)(.*?)\\\\,(\\-+|=+)\\s*\\\\,(.*)$$" -> ("h",surroundByHeadTAGUnderlineStyle _)
 	//"^(.*?)(\\\\,.+?\\\\,)(.*?)$$" -> ("p",surroundByAbstructTAG _)
 	)
 	
+	private val specialLayout:List[String] = List("blockquote")
+	private def layoutControl(text:String,tags:List[String]):String = {
+	  for(l <- tags.iterator){
+	    val m = s"""^(.*?)<$l>((.*?\\,)+?)</$l>(.*?)$$""".r.findAllMatchIn(text)
+	    if(m != null){
+	    	for(e <- m){
+	    		e.group(3).replaceAll("\\,", "<br />\\,")
+	    		log info e.group(3)
+	    	}
+	    }
+	  }
+	  text
+	}
 	private def surroundByBlockquoteTAG(doc:String, regex:String, TAG:String):String = {
 	  val p = new Regex(regex, "before","inTAG","midInTag","following")
 	  val m = p findFirstMatchIn(doc)
@@ -53,28 +64,34 @@ class BQParser {
   		if(m.get.group("following") != None){fol = m.get.group("following")}else{fol = ""}
   		
   		log info "=>" + mid
+  		var following = ""
 		if(mid != null){
 		  val mat = """(.+?\\,)+?""".r.findAllMatchIn(mid)
 		  
-		  var inCurrentBQ = true
-		  
+		  var inCurrentBQ = true		  
 		  for(mt <- mat){
 		    if(!mt.group(1).startsWith(">")||mt.group(1) == "\\\\,"){
 		    	inCurrentBQ = false
 		    }
 		    if(inCurrentBQ){
-		      contentStr += mt.group(1).tail
+		      val m = """.*?<br />\\,$$""".r.findFirstMatchIn(mt.group(1))
+		      var break = "\\\\,"
+		      if(m == None){break = "<br />\\\\,"}
+		      contentStr += mt.group(1).tail.replaceAll("\\\\,", break)
 		    }else{
 		      log info "(" + mt.group(1) + ")"
-		      fol += mt.group(1)}		    
+		      following += mt.group(1)
+		    }		    
 		    log info "^^^" + mt
 		  }
 		}
-  		log info "bef=" + bef + " mid=" + contentStr + " fol="  + fol 
+  		
+  		following += fol
+  		log info "bef=" + bef + " mid=" + contentStr + " fol="  + following 
 		log info "-->" + contentStr
 		return surroundByBlockquoteTAG(bef, regex, TAG) + 
 				s"<$TAG>\\," + surroundByBlockquoteTAG(contentStr, regex, TAG) + s"</$TAG>\\," +
-				surroundByBlockquoteTAG(fol, regex, TAG)
+				surroundByBlockquoteTAG(following, regex, TAG)
 	  }
 	  doc
 	}
@@ -143,7 +160,7 @@ class BQParser {
 			var i = indent
 			var list = List.empty[Tuple3[String,Int,String]]
 	  		for(elem <- doc){
-	  		  val m = s"""((\\s+?)$sign\\s(.+?)\\,)""".r.findFirstMatchIn(elem)
+	  		  val m = s"""((\\s+?)$sign\\s(.+?)\\\\,)""".r.findFirstMatchIn(elem)
 	  		  list = (m.get.group(1),m.get.group(2).size,m.get.group(3))::list
 	  		}
 
@@ -295,7 +312,7 @@ class BQParser {
 		 md = Syntax(k)._2(md, k, Syntax(k)._1)
 		}
 		val header = constructHEADER(markdown)
-		s"${docType}\n${header}\n<${htmlTAG}>\n<${bodyTAG}>\n${md}\n</${bodyTAG}>\n</${htmlTAG}>"
+		s"${docType}\n${header}\n<${htmlTAG}>\n<${bodyTAG}>\n${layoutControl(md, specialLayout).replaceAll("\\\\,","\n")}\n</${bodyTAG}>\n</${htmlTAG}>"
 	}
 	
 	
