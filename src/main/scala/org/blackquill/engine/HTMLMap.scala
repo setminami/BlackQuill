@@ -100,18 +100,69 @@ class HTMLMap{
     """~=""".r -> "&cong;","""<\_""".r -> "&le;",""">\_""".r -> "&ge","""\|FA""".r -> "&forall;","""\|EX""".r -> "&exist;",
     """\|=""".r -> "&equiv;","""\(\+\)""".r -> "&oplus;","""\(\-\)""".r -> "&ominus;","""\(X\)""".r -> "&otimes;",
     """\(c\)""".r -> "&copy;","""\(R\)""".r ->"&reg;","""\(SS\)""".r -> "&sect;","""\(TM\)""".r -> "&trade;",
-    """!in""".r -> "&notin;", """<""".r->"&lt;","""[^\\,|^>+]>""".r->"&gt;")
+    """!in""".r -> "&notin;", """\\<""".r->"&lt;","""\\>""".r->"&gt;","""\\&""".r->"&amp;")
 
+  
   private def passThrough(text:String):String = {text}
-  private def specialCharConvert(text:String):String = {
+  
+  def specialCharConvert(text:String):String = {
     var str = text
     for(elem <- specialChar.keys){
       str = elem replaceAllIn(str,m => specialChar(elem))
     }
     str
   }
+  
+/*
+  def ampConverter(text:String):String = {
+    val index = text.indexWhere(_ == '&',0)
+    
+    val headStr = text.slice(0,index)
+    val subStr = text.slice(index,text.size)
+    
+    val amp : Regex = """^(.*?)(&(.+?)(;|\\,))(.*?)$$""".r
+    subStr match{
+      case amp(v1,v2,v3,v4,v5) =>
+        if("\\,".equals(v4)){
+          return headStr + (v1 + v2).replaceAll("&","&amp;") + ampConverter(v5)
+        }else if(";".equals(v4)){
+          return headStr + v1.replaceAll("&","&amp;") + v2 + ampConverter(v5)      
+        }
+      case _ => return text
+    }
+    text
+  }
+  
+  def gtConverter(text:String):String = {
+   if(text.contains(">")){
+     val index = text.indexWhere(_ == '>',0)
+     if(index < 2){return text}
+     
+     val headStr = text.slice(0,index -2)     
+     val subStr = text.slice(index - 2,text.size)
 
-
+     val gtSeq : Regex = """(.*?)(>+)(.*?)""".r 
+     subStr match{    
+       case  gtSeq(v1,v2,v3) =>
+         log debug subStr
+         log debug v1
+         if(v1 == "\\,"){
+           log debug "***->" + v2
+           return headStr + v1 + v2 + gtConverter(v3)
+         }else{
+           return headStr + v1 + v2.replaceFirst(v2,"&gt;"*v2.size) + gtConverter(v3)
+         }
+       case _ =>
+         return headStr + subStr
+     }
+   }else{return text}
+ }
+  
+  def ltConverter(text:String):String ={
+	text.replaceAll("<","&lt;")
+  }
+ */
+ 
   def htmlTAGFilter(doc:String):String = {
     if(doc == ""){return ""}
     val node = new BQParser
@@ -155,7 +206,7 @@ class HTMLMap{
         			"before","attribute","inTAG","following")
         	val m = p findFirstMatchIn(doc)
         	if(m != None){
-        		log info "[" + elem + "]"
+        		log debug "[" + elem + "]"
         		return htmlTAGFilter(m.get.group("before")) + 
         				"<" + elem + m.get.group("attribute") + ">" + 
         				HTMLTag(elem)._2(m.get.group("inTAG")) + endTag + 
@@ -171,7 +222,8 @@ class HTMLMap{
     	}
       }	
     }
-    specialCharConvert(doc):String
+    specialCharConvert(doc)
+    
   }
 
 }
