@@ -6,17 +6,36 @@ package org.blackquill.io
 // FileI/O object.
 
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
 import org.apache.commons.logging._
 import java.io.File
 import scala.collection.JavaConversions._
 import org.blackquill.main.BlackQuill
+import java.io.FileNotFoundException
 
-
-class FileIO{
-  private val log:Log = LogFactory.getLog(classOf[FileIO])
+object FileIO{
+  private val log:Log = LogFactory.getLog(FileIO.getClass)
+  private var baseDir = ""
 
   def openMarkdownFromFile(fileName:String):List[String] = {
-    FileUtils.readLines(new File(fileName)).toList
+    try{
+        baseDir = FilenameUtils getFullPath fileName
+        FileUtils.readLines(new File(fileName)).toList
+        }catch{
+          case e:FileNotFoundException  =>
+          log error "File Not Found :" + fileName
+          exit(-1)
+        }
+  }
+
+  def openCSSFile(fileName:String):List[String] = {
+    val p = """^(?i)(file:|http|\/|\w:\\).*$$""".r
+    val m = p findFirstMatchIn(fileName)
+    if(m != None){
+      openMarkdownFromFile(fileName)
+    }else{
+      openMarkdownFromFile(baseDir + fileName)
+    }
   }
 
   def openMarkdownFromString(str:String){

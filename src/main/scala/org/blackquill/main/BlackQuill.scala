@@ -21,13 +21,13 @@ object BlackQuill{
   val syntax = "BlackQuill-Details-of-Syntax"
   val philosophy = "BlackQuill-Philosophy"
 
-  val options = 
+  val options =
     "--force|-f : Force conversion. BQ ignore timestamps of markdown files.\n" +
-    "--stdout|-s :BQ outputs document to STDOUT as HTML.\n" + 
+    "--stdout|-s :BQ outputs document to STDOUT as HTML.\n" +
     "--enc shift-jis|euc-jp|UTF-8|ASCII default input enc is UTF-8\n" +
     "--output DIR|-o :BQ outputs HTML to under DIR\n" +
     "--verbose|-v :output conversion processes verbosely \n" +
-    "--version :output version and so on.\n" + 
+    "--version :output version and so on.\n" +
     "--help|-h :output usage descriptions\n" +
     "...and  Markdown file's suffix is .md|.markdown|.txt|.bq|.BlackQuill\n" +
     "e.g., BlackQuill --force foo.md"
@@ -37,7 +37,7 @@ object BlackQuill{
     "BQ switches=> \n" + options +
     "\nPlease see also... \n" +
     wiki + syntax + "\n" +
-    wiki + philosophy + "\n" 
+    wiki + philosophy + "\n"
 
   object Switches{
     def setInputfile(input:String){inputFile = input}
@@ -104,7 +104,7 @@ object BlackQuill{
           case "--version" => log.info("BlackQuill Version" + VERSION + " updated at " + lastDate)
           case "--help"|"-h" =>
             println(description)
-          case _ => 
+          case _ =>
             if(sufRegex.findFirstIn(elem.toString) != None){
               Switches.setInputfile(elem.toString)
             }else{
@@ -113,7 +113,7 @@ object BlackQuill{
         }
       }
     }catch{ case e:Exception => log.warn("wrong switch is found see --help or Website\n" + wiki)}
-    val fileHandler = new FileIO
+    val fileHandler = FileIO
     // - fileHandler.openMarkdownFromString(str:String)
     val text:List[String] = fileHandler openMarkdownFromFile(Switches.getInputfile)
     val output = blackquill(text)

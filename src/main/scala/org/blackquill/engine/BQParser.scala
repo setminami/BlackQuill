@@ -15,6 +15,7 @@ import scala.util.matching.Regex
 import scala.xml._
 
 import org.blackquill.engine._
+import org.blackquill.io.FileIO
 
 
 class BQParser {
@@ -26,7 +27,9 @@ class BQParser {
 	//STRONG
 	"^(.*?)`(.*)" -> ("code",surroundByCodeTAG _),
 	"^(.*)\\[(.+?)\\]\\[(.*?)\\](.*)$$" -> ("a",expandUrlDefinitions _),
-	"^(.*?)\\[(.*?)\\]\\((.+?)(\\x20+?\"(.+?)\")??\\)(.*?)$$" -> ("a", surroundaHrefTAG _),
+	"^(.*?)!\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?(?:\\x20+?(\\d+?%?)?x(\\d+?%?)?)?\\)(?:\\{(.+?)\\}){0,1}(.*)$$"
+	-> ("img", putImgTAG _),
+	"^(.*?)\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?\\)(?:\\{(.+?)\\})?(.*?)$$" -> ("a", surroundaHrefTAG _),
 	"^(.*?\\\\,)(((?:\\x20{4,}|\\t+)(.*?\\\\,))+)(.*?)$$" -> ("code",surroundByPreCodeTAG _),
 	"^(.*?\\\\,)((>.*(?:\\\\,))+?)(.*?)$$" -> ("blockquote",surroundByBlockquoteTAG _),
 	"^(.*?)(((?:\\x20{4,}|\\t+)\\d+?\\.\\x20.+?\\\\,)+)(.*?)$$" -> ("ol",surroundByListTAG _),
@@ -40,6 +43,55 @@ class BQParser {
 	//"^(.*?)(\\\\,.+?\\\\,)(.*?)$$" -> ("p",surroundByAbstructTAG _)
 	)
 
+	private def putImgTAG(doc:String, regex:String, TAG:String):String = {
+		if(doc == ""){return ""}
+
+		val p = new Regex(regex,"before","alt","url","title","resX","resY","css","following")
+		val m = p findFirstMatchIn(doc)
+
+		if(m != None){
+			val bef = m.get.group("before")
+			val fol = m.get.group("following")
+			val alt = m.get.group("alt")
+			val url = m.get.group("url")
+			return putImgTAG(bef,regex,TAG) + s"""<$TAG src=\"$url\" alt=\"$alt\" ${getTitleName(m.get.group("title"))}""" +
+				s"""${getResolutionX(m.get.group("resX"))}${getResolutionY(m.get.group("resY"))}${decideClassOrStyle(doc,m.get.group("css"))}>""" +
+				putImgTAG(fol,regex,TAG)
+		}
+		doc
+	}
+
+	private def getResolutionX(resX:String):String = Option(resX) match{
+		case None => return ""
+		case Some(x) => return s" width=$resX "
+		case _ =>
+			log error "unknown parameter has found." + resX
+			exit(-1)
+	}
+
+	private def getResolutionY(resY:String):String = Option(resY) match{
+		case None => return ""
+		case Some(y) => return s" height=$resY "
+		case _ =>
+			log error "unknown parameter has found." + resY
+			exit(-1)
+	}
+	private def searchCSSClassName(doc:String,cssClass:String):Boolean = {
+		val p = """(?i)<link.*?type=\"text\/css\".*?href=\"(.*?)\".*?>""".r
+		val m = p findFirstMatchIn(doc)
+
+		if(m != None){
+			val fileName = m.get.group(1)
+			val CSSHandler = FileIO
+			val CSS = CSSHandler openCSSFile(fileName) mkString("")
+			log debug CSS
+			for(line <- CSS.split("""\/\*.*?\*\/""")){
+				log debug "***" + line
+				if(line.contains(cssClass + " ")){return true}
+			}
+		}
+		false
+	}
 
 	private def surroundByCodeTAG(doc:String, regex:String, TAG:String):String = {
 	    def _surroundByCodeTAG(doc:String,regex:String,innerSign:String,TAG:String):String = {
@@ -150,8 +202,32 @@ class BQParser {
 		_urlDefinitions(doc)
 	}
 
+	private def decideClassOrStyle(doc:String,className:String):String = {
+		if(className == "" || className == null){
+			return ""
+		}
+
+		if(!searchCSSClassName(doc,className)){
+			if(!className.contains(":")){
+				log warn s"[CSS] $className Class Name Not Found."
+				return "class=\"" + className +"\""
+			}
+			return "style=\"" + className + "\""
+		}else{
+			return "class=\"" + className +"\""
+		}
+	}
+
+	private def getTitleName(title:String):String = {
+		if(title == ""| title == null){
+			return ""
+		}
+
+		return s"""title=\"$title\" """
+	}
+
 	private def surroundaHrefTAG(doc:String,regex:String,TAG:String):String = {
-		val p = new Regex(regex,"before","inTag","link","ab","title","following")
+		val p = new Regex(regex,"before","inTag","link","title","css","following")
 		val m = p findFirstMatchIn(doc)
 
 		var bef = ""
@@ -164,15 +240,10 @@ class BQParser {
 
 			val link = m.get.group("link")
 			val label = m.get.group("inTag")
-			if(m.get.group("title") == null){
-				return surroundaHrefTAG(bef,regex,TAG) + s"""<$TAG href=\"$link\">$label</$TAG>""" +
-						surroundaHrefTAG(fol,regex,TAG)
-			}else{
-				val title = m.get.group("title")
-				return surroundaHrefTAG(bef, regex, TAG) +
-						s"""<$TAG href=\"$link\" title=\"$title\">$label</$TAG>""" +
-						surroundaHrefTAG(fol,regex,TAG)
-			}
+			return surroundaHrefTAG(bef, regex, TAG) +
+					s"""<$TAG href=\"$link\" ${getTitleName(m.get.group("title"))}""" +
+					s"""${decideClassOrStyle(doc,m.get.group("css"))}>$label</$TAG>""" +
+					surroundaHrefTAG(fol,regex,TAG)
 		}
 		doc
 	}

@@ -1,0 +1,12 @@
+<link rel="stylesheet" type="text/css" href="./matome.css" media="all">
+
+![sss](http://sss.com "titleSSS")
+![ttt](http://ttt.com "titleTTT" 200x800)
+![uuu](http://uuu.com "titleUUU" 200x)
+![vvv](http://vvv.com "titleVVV" x300)
+![www](http://www.com){sample2}
+[aaa](http://bbb.com){sample1}
+[qqq](http://qqq.com){boreder:10px}
+[ppp](http://ppp.com){sample100}
+
+![rrr](http://rrr.com)
