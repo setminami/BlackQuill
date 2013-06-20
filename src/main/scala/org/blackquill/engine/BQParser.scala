@@ -646,13 +646,24 @@ class BQParser {
 		for(k <- Syntax keys){
 		 md = Syntax(k)._2(md, k, Syntax(k)._1)
 		}
+
+		md = backslashEscape(md)
 	  	log info urlDefMap
 		val header = constructHEADER(markdown)
 		s"${docType}\n${header}\n<${htmlTAG}>\n<${bodyTAG}>\n${md.replaceAll("\\\\,","\n")}\n</${bodyTAG}>\n</${htmlTAG}>"
 	}
 
-	def private backslashEscape(doc:String):String = {
-		
+	private def backslashEscape(doc:String):String = {
+		val escapeCharSet = Set("\\","`","*","_","{","}","[","]","(",")","#","+","-","!")
+		var bef = ""
+		for(e <- doc){
+			if(escapeCharSet.contains(e.toString) && bef.reverse.head.toString == "\\"){
+				bef = bef.init + e
+			}else{
+				bef += e
+			}
+		}
+		return bef
 	}
 
 }
