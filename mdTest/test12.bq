@@ -10,3 +10,15 @@
 [ppp](http://ppp.com){sample100}
 
 ![rrr](http://rrr.com)
+[Google][]
+[AAA][1]
+[BBB][2]{sample2}
+[CCC][2]
+[2][]
+
+![Foo][]
+
+[Google]:http://google.com "Google"
+[Foo]:./img/img.jpg "IMG" 200x300 {sample1}
+[1]:http://aaa.com
+[2]:http://bbb.com 200x300 {sample3}

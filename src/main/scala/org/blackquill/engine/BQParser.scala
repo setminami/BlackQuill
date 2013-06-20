@@ -8,6 +8,7 @@ import org.apache.commons.logging._
 import scala.collection.immutable.List
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.Set
 import scala.collection.mutable.Stack
 import scala.collection.mutable.ListMap
 import scala.collection.SortedSet
@@ -21,13 +22,16 @@ import org.blackquill.io.FileIO
 class BQParser {
 	private val log:Log = LogFactory.getLog(classOf[BQParser])
 
-	private var urlDefMap = new HashMap[String,Tuple2[String,String]]
+	private var urlDefMap = new HashMap[String,Tuple5[String,String,String,String,String]]
 
 	private val Syntax = LinkedHashMap(
 	//STRONG
 	"^(.*?)`(.*)" -> ("code",surroundByCodeTAG _),
-	"^(.*)\\[(.+?)\\]\\[(.*?)\\](.*)$$" -> ("a",expandUrlDefinitions _),
-	"^(.*?)!\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?(?:\\x20+?(\\d+?%?)?x(\\d+?%?)?)?\\)(?:\\{(.+?)\\}){0,1}(.*)$$"
+	"^(.*)<([\\w\\d\\.\\-\\_\\+]+?)@([\\w\\d\\.\\-\\_\\+]+?)>(.*)" -> ("a", autoMailLink _),
+	"^(.*)<(https?:\\/\\/[\\w\\d\\.\\/]+?)>(.*)$$" -> ("a",autoURLLink _),
+	"^(.*)!\\[(.+?)\\]\\[(.*?)\\](?:\\{(.+?)\\})?(.*)$$" -> ("img",referenceExpander _),
+	"^(.*)\\[(.+?)\\]\\[(.*?)\\](?:\\{(.+?)\\})?(.*)$$" -> ("a",referenceExpander _),
+	"^(.*?)!\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?(?:\\x20+?(\\d+?%?)?x(\\d+?%?)?)?\\)(?:\\{(.+?)\\})?(.*)$$"
 	-> ("img", putImgTAG _),
 	"^(.*?)\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?\\)(?:\\{(.+?)\\})?(.*?)$$" -> ("a", surroundaHrefTAG _),
 	"^(.*?\\\\,)(((?:\\x20{4,}|\\t+)(.*?\\\\,))+)(.*?)$$" -> ("code",surroundByPreCodeTAG _),
@@ -43,6 +47,40 @@ class BQParser {
 	//"^(.*?)(\\\\,.+?\\\\,)(.*?)$$" -> ("p",surroundByAbstructTAG _)
 	)
 
+	private def autoMailLink(doc:String, regex:String, TAG:String):String = {
+		if(doc == ""){return ""}
+
+		val p = new Regex(regex, "before","inTAG","domain","following")
+		val m = p findFirstMatchIn(doc)
+
+		if(m!= None){
+			val bef = m.get.group("before")
+			val fol = m.get.group("following")
+			val mail = m.get.group("inTAG")
+			val domain = m.get.group("domain")
+
+			return autoMailLink(bef, regex, TAG) +
+				s"""<script type=\"text/javascript\">\\,document.write('<$TAG href=\\"mailto:$mail')\\,document.write(\"@\")\\,document.write(\"$domain\\">MailMe!</$TAG>\") </script>""" +
+				autoMailLink(fol, regex, TAG)
+		}
+		doc
+	}
+	private def autoURLLink(doc:String, regex:String, TAG:String):String = {
+		if(doc == ""){return ""}
+
+		val p = new Regex(regex, "before","inTAG","following")
+		val m = p findFirstMatchIn(doc)
+
+		if(m!= None){
+			val bef = m.get.group("before")
+			val fol = m.get.group("following")
+			val url = m.get.group("inTAG")
+
+			return autoURLLink(bef, regex, TAG) + s"""<$TAG href=\"$url\">$url</$TAG> """ +
+				autoURLLink(fol, regex, TAG)
+		}
+		doc
+	}
 	private def putImgTAG(doc:String, regex:String, TAG:String):String = {
 		if(doc == ""){return ""}
 
@@ -138,8 +176,13 @@ class BQParser {
     _surroundByCodeTAG(doc,regex,"`",TAG)
 	}
 
-	private def expandUrlDefinitions(doc:String, regex:String, TAG:String):String = {
+	private def referenceExpander(doc:String, regex:String, TAG:String):String = {
 		val m = regex.r.findFirstMatchIn(doc)
+		def expandAttribute(value:String):String = value match{
+			case "" => return ""
+			case _ => return value
+		}
+
 		if(m != None){
 			var key = ""
 			if(m.get.group(3) != ""){
@@ -149,9 +192,26 @@ class BQParser {
 			}
 
 			if(urlDefMap.contains(key)){
-				return expandUrlDefinitions(m.get.group(1), regex, TAG) +
-						s"""<$TAG href=\"${urlDefMap(key)._1}\" title=\"${urlDefMap(key)._2}\">""" +
-						m.get.group(2) + s"""</$TAG>""" + expandUrlDefinitions(m.get.group(4), regex, TAG)
+				val tup5 = urlDefMap(key)
+				var css = ""
+				if(m.get.group(4) == null){
+					css = expandAttribute(tup5._5)
+				}else{
+					css = decideClassOrStyle(doc,m.get.group(4))
+				}
+				TAG match {
+					case "a" =>
+						return referenceExpander(m.get.group(1), regex, TAG) +
+						s"""<$TAG href=\"${tup5._1}\" ${expandAttribute(tup5._2)}$css>""" +
+						m.get.group(2) + s"""</$TAG>""" + referenceExpander(m.get.group(5), regex, TAG)
+					case "img" =>
+						return referenceExpander(m.get.group(1), regex, TAG) +
+						s"""<$TAG src=\"${tup5._1}\" alt=\"${m.get.group(2)}\" ${expandAttribute(tup5._2)}${expandAttribute(tup5._3)}${expandAttribute(tup5._4)} $css>""" +
+						referenceExpander(m.get.group(5), regex, TAG)
+					case _ =>
+						log error "Unknown Expand TAG from Reference"
+						exit(-1)
+				}
 			}else{
 			  log warn "Link definition was not found : " + key
 			  doc
@@ -166,31 +226,43 @@ class BQParser {
 		def _urlDefinitions(text:String):String = {
 		    var bef = ""
  		    var fol = ""
-
-		    log debug "doc ==>" + text
-		    val p = new Regex("""^(.*?){0,1}(((\[([\w\d\.\,\-]+?)\]:([\w\d:\/\.]+?)(\s+\"(.+?)\"){0,1})\\,)+?)(?:\\,|\z)(.*){0,1}$$""",
-				"before","seq","elem1","elem2","landMark","link","test","Title", "following")
-		    val m = p findFirstMatchIn(text)
 			if(text == ""){return text}
+
+		    log info "doc ==>" + text
+		    val p = new Regex("""^(.*?)?(((\[([\w\d\.\_\+\-\:\/)]+?)\]:([\w\d\.\_\+\-\:\/]+?)(?:\s+\"(.+?)\")?(?:\s+(\d+%?x\d+%?))?(?:\s+\{(.+?)\})?)\s*\\,)+?)(?:\\,|\z)(.*)?$$""",
+				"before","seq","elem1","elem2","landMark","link","Title","Res","Css", "following")
+		    val m = p findFirstMatchIn(text)
+
 			if(m != None){
 				if(m.get.group("before") != None){bef = m.get.group("before")}
 				if(m.get.group("following") != None){fol = m.get.group("following")}
 
 				log debug "bef=>" + bef
-				log debug "seq=>" + m.get.group("seq")
+				log info "seq=>" + m.get.group("seq")
 				log debug "fol=>" + fol
 				if(m.get.group("seq") != None){
 					val seq = m.get.group("seq")
-					val mat = """\[(.+?)\]:([\w\d:\/\.]+)(\s+\"(.+)\"){0,1}(?:\\,){0,1}""".r.findAllMatchIn(seq)
+					val mat =
+					"""\[([\w\d\.\_\+\-\:\/]+?)\]:([\w\d\.\_\+\-\:\/]+)(\s+\"(.+?)\")?(?:\s+(\d+%?x\d+%?))?(?:\s+\{(.+?)\})?(?:\s*\\,)?""".r.findAllMatchIn(seq)
 					for(e <- mat){
 						val link = e.group(2)
-						log debug ">>" + link
+						log info ">>" + link
 						val landMark = e.group(1)
-						log debug ">>>" + landMark
+						log info ">>>" + landMark
 						var title = ""
-						if(e.group(4) != null){title = e.group(4)}
-
-						urlDefMap += (landMark.toLowerCase->(link,title))
+						if(e.group(4) != null){title = s"""title=\"${e.group(4)}\" """}
+						var resX = ""
+						var resY = ""
+						if(Option(e.group(5)) != None){
+							val matResolution = """(\d+%?)x(\d+%?)""".r.findFirstMatchIn(e.group(5))
+							resX = getResolutionX(matResolution.get.group(1))
+							resY = getResolutionY(matResolution.get.group(2))
+						}
+						var css = ""
+						if(e.group(6) != null){
+							css = decideClassOrStyle(text,e.group(6))
+						}
+						urlDefMap += (landMark.toLowerCase->(link,title,resX,resY,css))
 					}
 				}
 				_urlDefinitions(bef) + _urlDefinitions(fol)
@@ -574,10 +646,13 @@ class BQParser {
 		for(k <- Syntax keys){
 		 md = Syntax(k)._2(md, k, Syntax(k)._1)
 		}
-	  	log debug urlDefMap
+	  	log info urlDefMap
 		val header = constructHEADER(markdown)
 		s"${docType}\n${header}\n<${htmlTAG}>\n<${bodyTAG}>\n${md.replaceAll("\\\\,","\n")}\n</${bodyTAG}>\n</${htmlTAG}>"
 	}
 
+	def private backslashEscape(doc:String):String = {
+		
+	}
 
 }
