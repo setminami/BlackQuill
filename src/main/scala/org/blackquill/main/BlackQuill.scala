@@ -121,11 +121,11 @@ object BlackQuill{
   }
 
   def blackquill(lines:List[String]):List[String] = {
-    val str = new HTMLMap htmlTAGFilter lines.mkString("\\,")
+    val str = new HTMLMap htmlTAGFilter lines.mkString("""\,""")
     log info str
     val parsed = new BQParser
     log info parsed.toHTML(str)
-    str split """\\,""" toList
+    str split """\,""" toList
   }
 
 }

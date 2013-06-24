@@ -9,8 +9,17 @@ import org.apache.commons.logging._
 import scala.util.matching.Regex
 
 class HTMLMap{
-  
+
   private val log:Log = LogFactory.getLog(classOf[HTMLMap])
+
+  val INLINETags = Set(
+    "a","abbr","acronym","b","basefont","bdo","big","br","cite","code","dfn",
+"em","font","i","img","input","kbd","label","q","s","samp","select",
+"small","span","strike","strong","sub","sup","textarea","tt","u","var")
+
+  val BLOCKTags = Set(
+    "address","blockquote","center","div","dl","fieldset","form","h1","h2","h3","h4","h5","h6",
+    "hr","noframes","noscript","ol","p","pre","table","ul")
 
   private val HTMLTag = LinkedHashMap(
     "hr"->Tuple2((None),passThrough _),
@@ -102,9 +111,9 @@ class HTMLMap{
     """\(c\)""".r -> "&copy;","""\(R\)""".r ->"&reg;","""\(SS\)""".r -> "&sect;","""\(TM\)""".r -> "&trade;",
     """!in""".r -> "&notin;", """\\<""".r->"&lt;","""\\>""".r->"&gt;","""\\&""".r->"&amp;")
 
-  
+
   private def passThrough(text:String):String = {text}
-  
+
   def specialCharConvert(text:String):String = {
     var str = text
     for(elem <- specialChar.keys){
@@ -112,37 +121,37 @@ class HTMLMap{
     }
     str
   }
-  
+
 /*
   def ampConverter(text:String):String = {
     val index = text.indexWhere(_ == '&',0)
-    
+
     val headStr = text.slice(0,index)
     val subStr = text.slice(index,text.size)
-    
+
     val amp : Regex = """^(.*?)(&(.+?)(;|\\,))(.*?)$$""".r
     subStr match{
       case amp(v1,v2,v3,v4,v5) =>
         if("\\,".equals(v4)){
           return headStr + (v1 + v2).replaceAll("&","&amp;") + ampConverter(v5)
         }else if(";".equals(v4)){
-          return headStr + v1.replaceAll("&","&amp;") + v2 + ampConverter(v5)      
+          return headStr + v1.replaceAll("&","&amp;") + v2 + ampConverter(v5)
         }
       case _ => return text
     }
     text
   }
-  
+
   def gtConverter(text:String):String = {
    if(text.contains(">")){
      val index = text.indexWhere(_ == '>',0)
      if(index < 2){return text}
-     
-     val headStr = text.slice(0,index -2)     
+
+     val headStr = text.slice(0,index -2)
      val subStr = text.slice(index - 2,text.size)
 
-     val gtSeq : Regex = """(.*?)(>+)(.*?)""".r 
-     subStr match{    
+     val gtSeq : Regex = """(.*?)(>+)(.*?)""".r
+     subStr match{
        case  gtSeq(v1,v2,v3) =>
          log debug subStr
          log debug v1
@@ -157,16 +166,16 @@ class HTMLMap{
      }
    }else{return text}
  }
-  
+
   def ltConverter(text:String):String ={
 	text.replaceAll("<","&lt;")
   }
  */
- 
+
   def htmlTAGFilter(doc:String):String = {
     if(doc == ""){return ""}
     val node = new BQParser
-    
+
 
     val NORMALIZE: Regex = """(?i)(.+)""".r
 
@@ -175,8 +184,8 @@ class HTMLMap{
       log debug HTMLTag(elem)._1
       val tmp = "</" + elem + ">"
       val endTag = HTMLTag(elem)._1
-      
-      for (eT <- Iterator(HTMLTag(elem) _1)){ 
+
+      for (eT <- Iterator(HTMLTag(elem) _1)){
     	eT match{
     	case None =>
     		val p = new Regex(s"""(?i)^(.*?)<${elem}\\s*[>|\\/>](.*?)$$""","before","following")
@@ -184,21 +193,21 @@ class HTMLMap{
     		if(m != None){
     			return htmlTAGFilter(m.get.group("before")) + "<" +
     					elem + " />" + htmlTAGFilter(m.get.group("following"))
-    		}    	
+    		}
     	case NORMALIZE("-->") =>
     	  val p = new Regex(s"""^(.*?)<${elem}.*?${endTag}(.*?)$$""","before","following")
     	  val m = p findFirstMatchIn(doc)
     	  if(m != None){
     		return htmlTAGFilter(m.get.group("before")) + htmlTAGFilter(m.get.group("following"))
     	  }
-    	case NORMALIZE(">") => 
+    	case NORMALIZE(">") =>
           	val p = new Regex(s"""(?i)^(.*?)<${elem}\\s((\\w+=\\"(.*?)\\"\\s??)+)\\/??>(.*?)$$""",
           			"before","attributes","attribute","contents","following")
           	val m = p findFirstMatchIn(doc)
           	if(m != None){
           	  return htmlTAGFilter(m.get.group("before")) + "<" + elem + " " + m.get.group("attributes") + ">" +
           			  htmlTAGFilter(m.get.group("following"))
-          			  		
+
           	}
         case NORMALIZE(tmp) =>
         	val p = new Regex(
@@ -207,23 +216,23 @@ class HTMLMap{
         	val m = p findFirstMatchIn(doc)
         	if(m != None){
         		log debug "[" + elem + "]"
-        		return htmlTAGFilter(m.get.group("before")) + 
-        				"<" + elem + m.get.group("attribute") + ">" + 
-        				HTMLTag(elem)._2(m.get.group("inTAG")) + endTag + 
+        		return htmlTAGFilter(m.get.group("before")) +
+        				"<" + elem + m.get.group("attribute") + ">" +
+        				HTMLTag(elem)._2(m.get.group("inTAG")) + endTag +
         				htmlTAGFilter(m.get.group("following"))
         	}
-        case NORMALIZE("---") => 
+        case NORMALIZE("---") =>
         	val p = new Regex("""^(.*?)$$""","plain")
         	val m = p findFirstMatchIn(doc)
         	if(m != None){return node.toHTML(HTMLTag(elem)._2(m.get.group("plain"))).toString}
-        case _ => return specialCharConvert(doc)	     
-        //case NORMALIZE("""\\/>""") => 
+        case _ => return specialCharConvert(doc)
+        //case NORMALIZE("""\\/>""") =>
         //  	log info "###"
     	}
-      }	
+      }
     }
     specialCharConvert(doc)
-    
+
   }
 
 }

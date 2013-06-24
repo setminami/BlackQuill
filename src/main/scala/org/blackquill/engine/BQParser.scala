@@ -13,6 +13,7 @@ import scala.collection.mutable.Stack
 import scala.collection.mutable.ListMap
 import scala.collection.SortedSet
 import scala.util.matching.Regex
+import scala.util.control.Breaks.{break,breakable}
 import scala.xml._
 
 import org.blackquill.engine._
@@ -27,8 +28,10 @@ class BQParser {
 	private val Syntax = LinkedHashMap(
 	//STRONG
 	"^(.*?)`(.*)" -> ("code",surroundByCodeTAG _),
+	"""^(.*?)\\,\\,((?:\|?.+?\|?)+?)\\,((?:\|?:?\-{3,}:?\|?)+?)\\,((?:\|?.+?\|?\\,)+?)\\,(.*)$$"""
+	-> ("table",surroundTableTAG _),
 	"^(.*)<([\\w\\d\\.\\-\\_\\+]+?)@([\\w\\d\\.\\-\\_\\+]+?)>(.*)" -> ("a", autoMailLink _),
-	"^(.*)<(https?:\\/\\/[\\w\\d\\.\\/]+?)>(.*)$$" -> ("a",autoURLLink _),
+	"^(.*)<((?:https?|ftp):\\/\\/[\\w\\d\\.\\/]+?)>(.*)$$" -> ("a",autoURLLink _),
 	"^(.*)!\\[(.+?)\\]\\[(.*?)\\](?:\\{(.+?)\\})?(.*)$$" -> ("img",referenceExpander _),
 	"^(.*)\\[(.+?)\\]\\[(.*?)\\](?:\\{(.+?)\\})?(.*)$$" -> ("a",referenceExpander _),
 	"^(.*?)!\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?(?:\\x20+?(\\d+?%?)?x(\\d+?%?)?)?\\)(?:\\{(.+?)\\})?(.*)$$"
@@ -43,9 +46,95 @@ class BQParser {
 	"^(.*\\\\,)((?:\\-|\\*){3,}|(?:(?:\\-|\\*)\\x20){3,})(.*?)$$" -> ("hr",putHrTAG _),
 	"^(.*?)\\*\\*(.+?)\\*\\*(.*?)$$" -> ("strong",surroundByGeneralTAG _),
 	"^(.*?)\\*(.+?)\\*(.*?)$$" -> ("em",surroundByGeneralTAG _)
+//	"^(.*?)([^(?:\\\\,\\\\,).]+)(\\\\,\\,.*?)?$$" -> ("p",surroundByGeneralTAG _)
 	//WEAK
 	//"^(.*?)(\\\\,.+?\\\\,)(.*?)$$" -> ("p",surroundByAbstructTAG _)
 	)
+
+	private def surroundTableTAG(doc:String, regex:String, TAG:String):String = {
+	  	def _normalize(text:String):String = {
+	  	  var retStr = text
+	  	  if(retStr.startsWith("|")){
+	  	    retStr = retStr.tail.toString
+	  	  }
+	  	  if(retStr.endsWith("|")){
+	  	    retStr = retStr.init.toString
+	  	  }
+	  	  return retStr
+	  	}
+	  	
+	  	def _getAlign(alignList:List[String],i:Int):String = {
+	  	  if(i >= alignList.size){""}else{alignList(i)}
+	  	}
+
+		if(doc == ""){return ""}
+
+		log debug "***" + doc
+		val p = new Regex(regex, "before","headSeq","separatorSeq","bodySeq","following")
+		val m = p findFirstMatchIn(doc)
+
+		if(m != None){
+			val bef = m.get.group("before")
+			val fol = m.get.group("following")
+			var head = m.get.group("headSeq")
+			val sep = m.get.group("separatorSeq")
+			val body = m.get.group("bodySeq")
+
+			if(Option(sep) != None){
+				val pSep = """((?:\|)?(:?-{3,}?:?)(?:\|)?)+?""".r
+				val mSep = pSep.findAllMatchIn(sep)
+
+				var tableList = List[List[String]]()
+				var tmpList = List[String]()
+				for(mS <- mSep){
+					val align = mS.group(2)
+					if(align.startsWith(":") && align.endsWith(":")){
+						tmpList ::= """align=\"center\" """
+					}else if(align.startsWith(":")){
+						tmpList ::= """align=\"left\" """
+					}else if(align.endsWith(":")){
+						tmpList ::= """align=\"right\" """
+					}else{
+					  tmpList ::= ""
+					}
+				}
+				val alignList = tmpList.reverse
+				head = _normalize(head)
+				log info head
+				val heads = for((h,i) <- head.split("\\|").zipWithIndex)yield(s"""<th ${_getAlign(alignList,i)}>$h</th>\\,""")
+				val headList = heads.toList
+				if(headList.size != alignList.size){
+					log error "Table header is wrong.:" + headList
+					exit(-1)
+				}
+
+
+				log debug headList
+				log debug alignList
+
+
+				val pTBody = """((((\|)?(.*?)(\|)?)+?)\\,?)+?""".r
+				val mTBSeq = pTBody.findAllMatchIn(body)
+				var bodyList = List[String]()
+				tmpList = List.empty
+				for((mTBS,i) <- mTBSeq.zipWithIndex){
+					val row = _normalize(mTBS.group(2)).split("\\|")
+					val body =  for((c,j) <- row.zipWithIndex)yield(s"""<td ${alignList(j)}>$c</td>\\,""")
+					bodyList ::= "<tr>\\\\," + body.mkString("") + "</tr>\\\\,"
+				}
+
+				bodyList = bodyList.reverse
+				log debug bodyList
+				return surroundTableTAG(bef, regex, TAG) +
+					"\\\\,<table><thead>\\\\," + s"<tr>${headList.mkString("")}</tr></thead>\\\\," +
+					s"<tbody>${bodyList.mkString("")}</tbody></table>\\\\," +
+					surroundTableTAG(fol, regex, TAG)
+
+			}
+
+		}
+		doc
+	}
 
 	private def autoMailLink(doc:String, regex:String, TAG:String):String = {
 		if(doc == ""){return ""}
@@ -604,8 +693,8 @@ class BQParser {
 	}
 
 	private def surroundByGeneralTAG(doc:String, regex:String, TAG:String):String = {
-	  if(doc == ""){return doc}
-	  log debug doc
+	  if(doc == ""||Option(doc) == None){return ""}
+	  log info doc
 	  val p = new Regex(regex,"before","inTAG","following")
 	  val m = p findFirstMatchIn(doc)
 	  if(m != None){
@@ -648,16 +737,55 @@ class BQParser {
 		}
 
 		md = backslashEscape(md)
+		md = paragraphize(md)
 	  	log info urlDefMap
 		val header = constructHEADER(markdown)
 		s"${docType}\n${header}\n<${htmlTAG}>\n<${bodyTAG}>\n${md.replaceAll("\\\\,","\n")}\n</${bodyTAG}>\n</${htmlTAG}>"
 	}
 
+	private def paragraphize(doc:String):String = {
+		val delimiter = """\,"""
+		def f(text:String):String = {
+			text + delimiter
+		}
+		val BlockElements = new HTMLMap().BLOCKTags
+		var isBlock = false
+		var isOneLineBlock = false
+		var text = ""
+		var pg = ""
+
+		for(l <- doc.split("\\" + delimiter)){
+			isOneLineBlock = false
+			log debug l
+			breakable{
+				for(e <- BlockElements){
+				  log debug e
+					if(l.startsWith("<" + e) &&  l.endsWith("</" + e + ">")){
+						isOneLineBlock = true;break;
+					}else if(l.startsWith("<" + e)){
+						isBlock = true;break;
+					}else if(l.endsWith("</" + e + ">")){
+						isBlock = false;isOneLineBlock = true;break;
+					}
+				}
+			}
+			log debug ">>>>" + l + "::" + isBlock + "|" + isOneLineBlock
+			if(isBlock | isOneLineBlock){
+				text += l + delimiter
+			}else{
+				if(l != ""){text += "<p>" + l + "</p>" + delimiter}
+			}
+		}
+		text
+		//var text = "<p>" + doc.replaceAll("\\\\,\\\\,","</p>\\\\,\\\\,<p>") + "</p>"
+		//text.replaceAll("<p></p>","")
+	}
+
 	private def backslashEscape(doc:String):String = {
-		val escapeCharSet = Set("\\","`","*","_","{","}","[","]","(",")","#","+","-","!")
+		val escapeCharSet = Set("\\","`","*","_","{","}","[","]","(",")","#","+","-","!",":","|")
 		var bef = ""
 		for(e <- doc){
-			if(escapeCharSet.contains(e.toString) && bef.reverse.head.toString == "\\"){
+			if(bef.size > 2 && escapeCharSet.contains(e.toString) && bef.reverse.head.toString == "\\"){
 				bef = bef.init + e
 			}else{
 				bef += e
