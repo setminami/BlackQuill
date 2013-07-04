@@ -1,0 +1,23 @@
+{toc:h2-h6}
+
+
+
+
+aaa
+:bbb
+ccc
+:dddddd
+:eee
+:ffff
+
+*[aaa]{red/yellow}
+*[bbb]{red(+1|-1)[Times,suns]}
+*[bbb]{red(1|1)[Times]}
+<h2>aaa</h2>
+### test1
+aaaaaaaa55555
+aaaa
+##### test3
+## test4
+<h2>aaa</h2>
+<h2 id="foo">aaa</h2>

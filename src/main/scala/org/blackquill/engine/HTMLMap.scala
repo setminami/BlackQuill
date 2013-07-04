@@ -19,7 +19,7 @@ class HTMLMap{
 
   val BLOCKTags = Set(
     "address","blockquote","center","div","dl","fieldset","form","h1","h2","h3","h4","h5","h6",
-    "hr","noframes","noscript","ol","p","pre","table","ul")
+    "header","hr","noframes","noscript","ol","p","pre","table","ul")
 
   private val HTMLTag = LinkedHashMap(
     "hr"->Tuple2((None),passThrough _),
