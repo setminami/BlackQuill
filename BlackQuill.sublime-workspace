@@ -1,0 +1,680 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"fenced",
+				"fencedBox"
+			],
+			[
+				"findFirst",
+				"findFirstMatchIn	(CharSequence)"
+			],
+			[
+				"autoNu",
+				"autoNumberingHeader"
+			],
+			[
+				"to",
+				"toString"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "src/main/scala/org/blackquill/main/BlackQuill.scala",
+			"settings":
+			{
+				"buffer_size": 4026,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/main/scala/org/blackquill/engine/BQParser.scala",
+			"settings":
+			{
+				"buffer_size": 40827,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "mdTest/test16.bq",
+			"settings":
+			{
+				"buffer_size": 702,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/set/Desktop/BlackQuill Test/ex2.html",
+			"settings":
+			{
+				"buffer_size": 3196,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/main/scala/org/blackquill/breadboard/LaTeXConverter.scala",
+			"settings":
+			{
+				"buffer_size": 680,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/main/scala/org/blackquill/engine/HTMLMap.scala",
+			"settings":
+			{
+				"buffer_size": 9505,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": ".ensime_session",
+			"settings":
+			{
+				"buffer_size": 581,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "",
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Unix",
+				"name": "Ensime stack",
+				"scratch": true
+			}
+		},
+		{
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "Jul 11, 2013 10:10:02 AM org.blackquill.main.BlackQuill$ blackquill\nINFO: {toc:h2-h6}\\,{nrange:2-6}\\,\\,aaa\\,:bbb\\,ccc\\,:dddddd\\,:eee\\,:ffff\\,\\,*[aaa]{red/yellow}\\,*[bbb]{#00FF00(+1|-1)[Times,suns]}\\,*[bbb]{#FFFFFF/#000000(1|1)[Times]}\\,*[~bbb~]{red(1|1)[Times]}\\,<h2>aaa</h2>\\,### test1\\,aaaaaaaa55555\\,aaaa\\,##### test3\\,## test4\\,<h2>aaa</h2>\\,<h2 id=\"foo\">aaa</h2>\\,\\,aaaaaaa \\begin{TeX}1+2 \\end{TeX} bbbbbbbb\\,\\begin{TeX} A = \\frac{\\alpha + \\beta}{\\gamma + \\delta} \\end{TeX}\\,aaaaaaaaaaaaa\\,\\,% &rarr; 1\\,% &rarr; 2\\,%% &rarr; 2.1.\\,%%% &rarr; 2.1.1.\\,%% &rarr; 2.2.\\,%%% &rarr; 2.2.1\\,%% &rarr; 2.3.\\,% &rarr; 3.\\,\\,|-:b=1 solid gray w=300 rad=10------------|\\,aaaaaa\\,# qqqqqq\\,|-:b=2 solid gray w=200 rad=10------------|\\,aaaaaa\\,|______|\\,cccccc\\,|_________________________________________|\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser org$blackquill$engine$BQParser$$wordDefinition\nINFO: ***{toc:h2-h6}\\,{nrange:2-6}\\,\\,aaa\\,:bbb\\,ccc\\,:dddddd\\,:eee\\,:ffff\\,\\,*[aaa]{red/yellow}\\,*[bbb]{#00FF00(+1|-1)[Times,suns]}\\,*[bbb]{#FFFFFF/#000000(1|1)[Times]}\\,*[~bbb~]{red(1|1)[Times]}\\,<h2>aaa</h2>\\,### test1\\,aaaaaaaa55555\\,aaaa\\,##### test3\\,## test4\\,<h2>aaa</h2>\\,<h2 id=\"foo\">aaa</h2>\\,\\,aaaaaaa <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn><mo>+</mo><mn>2</mn></mrow><annotation encoding=\"SnuggleTeX\">$1+2 $</annotation></semantics></math> bbbbbbbb\\,<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>A</mi><mo>=</mo><mfrac><mrow><mi>&alpha;</mi><mo>+</mo><mi>&beta;</mi></mrow><mrow><mi>&gamma;</mi><mo>+</mo><mi>&delta;</mi></mrow></mfrac></mrow><annotation encoding=\"SnuggleTeX\">$ A = \\frac{\\alpha + \\beta}{\\gamma + \\delta} $</annotation></semantics></math>\\,aaaaaaaaaaaaa\\,\\,<h2>1. &rarr; 1</h2>\\,<h2>2. &rarr; 2</h2>\\,<h3>2.1. &rarr; 2.1.</h3>\\,<h4>2.1.1. &rarr; 2.1.1.</h4>\\,<h3>2.2. &rarr; 2.2.</h3>\\,<h4>2.2.1. &rarr; 2.2.1</h4>\\,<h3>2.3. &rarr; 2.3.</h3>\\,<h2>3. &rarr; 3.</h2>\\,\\,|-:b=1 solid gray w=300 rad=10------------|\\,aaaaaa\\,# qqqqqq\\,|-:b=2 solid gray w=200 rad=10------------|\\,aaaaaa\\,|______|\\,cccccc\\,|_________________________________________|\\,\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser org$blackquill$engine$BQParser$$wordDefinition\nINFO: seq ->aaa\\,:bbb\\,ccc\\,:dddddd\\,:eee\\,:ffff\\,\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser org$blackquill$engine$BQParser$$wordDefinition\nINFO: ***{toc:h2-h6}\\,{nrange:2-6}\\,\\,\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser org$blackquill$engine$BQParser$$wordDefinition\nINFO: ***\\,*[aaa]{red/yellow}\\,*[bbb]{#00FF00(+1|-1)[Times,suns]}\\,*[bbb]{#FFFFFF/#000000(1|1)[Times]}\\,*[~bbb~]{red(1|1)[Times]}\\,<h2>aaa</h2>\\,### test1\\,aaaaaaaa55555\\,aaaa\\,##### test3\\,## test4\\,<h2>aaa</h2>\\,<h2 id=\"foo\">aaa</h2>\\,\\,aaaaaaa <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn><mo>+</mo><mn>2</mn></mrow><annotation encoding=\"SnuggleTeX\">$1+2 $</annotation></semantics></math> bbbbbbbb\\,<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>A</mi><mo>=</mo><mfrac><mrow><mi>&alpha;</mi><mo>+</mo><mi>&beta;</mi></mrow><mrow><mi>&gamma;</mi><mo>+</mo><mi>&delta;</mi></mrow></mfrac></mrow><annotation encoding=\"SnuggleTeX\">$ A = \\frac{\\alpha + \\beta}{\\gamma + \\delta} $</annotation></semantics></math>\\,aaaaaaaaaaaaa\\,\\,<h2>1. &rarr; 1</h2>\\,<h2>2. &rarr; 2</h2>\\,<h3>2.1. &rarr; 2.1.</h3>\\,<h4>2.1.1. &rarr; 2.1.1.</h4>\\,<h3>2.2. &rarr; 2.2.</h3>\\,<h4>2.2.1. &rarr; 2.2.1</h4>\\,<h3>2.3. &rarr; 2.3.</h3>\\,<h2>3. &rarr; 3.</h2>\\,\\,|-:b=1 solid gray w=300 rad=10------------|\\,aaaaaa\\,# qqqqqq\\,|-:b=2 solid gray w=200 rad=10------------|\\,aaaaaa\\,|______|\\,cccccc\\,|_________________________________________|\\,\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser org$blackquill$engine$BQParser$$colorPen\nINFO: 1\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser org$blackquill$engine$BQParser$$colorPen\nINFO: 1\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser org$blackquill$engine$BQParser$$colorPen\nINFO: 1\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser org$blackquill$engine$BQParser$$generateTOC\nINFO: {toc:h2-h6}\\,{nrange:2-6}\\,\\,\\,<dl>\\,<dt>aaa</dt><dd>bbb</dd>\\,<dt>ccc</dt><dd>dddddd</dd>\\,<dd>eee</dd>\\,<dd>ffff</dd>\\,\\,</dl>\\,<span style=\" color:red; background-color:yellow;()\">aaa</span> \\,<span style=\" color:#00FF00; font-size:larger; font-weight:light font-family:'Times','suns';()\">bbb</span> \\,<span style=\" color:#FFFFFF; background-color:#000000; font-size:larger; font-weight:bolder font-family:'Times';()\">bbb</span> \\,<span style=\" color:red; font-size:larger; font-weight:bolder font-family:'Times'; text-decoration:overline;\">bbb</span> \\,<h2>aaa</h2>\\,<h3 >test1</h3>\\,aaaaaaaa55555\\,aaaa\\,<h5 >test3</h5>\\,<h2 >test4</h2>\\,<h2>aaa</h2>\\,<h2 id=\"foo\">aaa</h2>\\,\\,aaaaaaa <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn><mo>+</mo><mn>2</mn></mrow><annotation encoding=\"SnuggleTeX\">$1+2 $</annotation></semantics></math> bbbbbbbb\\,<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>A</mi><mo>=</mo><mfrac><mrow><mi>&alpha;</mi><mo>+</mo><mi>&beta;</mi></mrow><mrow><mi>&gamma;</mi><mo>+</mo><mi>&delta;</mi></mrow></mfrac></mrow><annotation encoding=\"SnuggleTeX\">$ A = \\frac{\\alpha + \\beta}{\\gamma + \\delta} $</annotation></semantics></math>\\,aaaaaaaaaaaaa\\,\\,<h2>1. &rarr; 1</h2>\\,<h2>2. &rarr; 2</h2>\\,<h3>2.1. &rarr; 2.1.</h3>\\,<h4>2.1.1. &rarr; 2.1.1.</h4>\\,<h3>2.2. &rarr; 2.2.</h3>\\,<h4>2.2.1. &rarr; 2.2.1</h4>\\,<h3>2.3. &rarr; 2.3.</h3>\\,<h2>3. &rarr; 3.</h2>\\,\\,|-:b=1 solid gray w=300 rad=10------------|\\,aaaaaa\\,<h1 >qqqqqq</h1>\\,|-:b=2 solid gray w=200 rad=10------------|\\,aaaaaa\\,|______|\\,cccccc\\,|_________________________________________|\\,\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line={toc:h2-h6} No=0\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line={nrange:2-6} No=1\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line= No=2\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line= No=3\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<dl> No=4\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<dt>aaa</dt><dd>bbb</dd> No=5\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<dt>ccc</dt><dd>dddddd</dd> No=6\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<dd>eee</dd> No=7\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<dd>ffff</dd> No=8\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line= No=9\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=</dl> No=10\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<span style=\" color:red; background-color:yellow;()\">aaa</span>  No=11\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<span style=\" color:#00FF00; font-size:larger; font-weight:light font-family:'Times','suns';()\">bbb</span>  No=12\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<span style=\" color:#FFFFFF; background-color:#000000; font-size:larger; font-weight:bolder font-family:'Times';()\">bbb</span>  No=13\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<span style=\" color:red; font-size:larger; font-weight:bolder font-family:'Times'; text-decoration:overline;\">bbb</span>  No=14\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h2>aaa</h2> No=15\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h3 >test1</h3> No=16\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=aaaaaaaa55555 No=17\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=aaaa No=18\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h5 >test3</h5> No=19\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h2 >test4</h2> No=20\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h2>aaa</h2> No=21\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h2 id=\"foo\">aaa</h2> No=22\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line= No=23\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=aaaaaaa <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn><mo>+</mo><mn>2</mn></mrow><annotation encoding=\"SnuggleTeX\">$1+2 $</annotation></semantics></math> bbbbbbbb No=24\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>A</mi><mo>=</mo><mfrac><mrow><mi>&alpha;</mi><mo>+</mo><mi>&beta;</mi></mrow><mrow><mi>&gamma;</mi><mo>+</mo><mi>&delta;</mi></mrow></mfrac></mrow><annotation encoding=\"SnuggleTeX\">$ A = \\frac{\\alpha + \\beta}{\\gamma + \\delta} $</annotation></semantics></math> No=25\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=aaaaaaaaaaaaa No=26\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line= No=27\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h2>1. &rarr; 1</h2> No=28\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h2>2. &rarr; 2</h2> No=29\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h3>2.1. &rarr; 2.1.</h3> No=30\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h4>2.1.1. &rarr; 2.1.1.</h4> No=31\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h3>2.2. &rarr; 2.2.</h3> No=32\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h4>2.2.1. &rarr; 2.2.1</h4> No=33\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h3>2.3. &rarr; 2.3.</h3> No=34\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h2>3. &rarr; 3.</h2> No=35\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line= No=36\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=|-:b=1 solid gray w=300 rad=10------------| No=37\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=aaaaaa No=38\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=<h1 >qqqqqq</h1> No=39\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=|-:b=2 solid gray w=200 rad=10------------| No=40\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=aaaaaa No=41\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=|______| No=42\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=cccccc No=43\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser$$anonfun$makeHeaderMap$1 apply\nINFO: line=|_________________________________________| No=44\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser makeHeaderMap\nINFO: List((35,2,None,3. &rarr; 3.), (34,3,None,2.3. &rarr; 2.3.), (33,4,None,2.2.1. &rarr; 2.2.1), (32,3,None,2.2. &rarr; 2.2.), (31,4,None,2.1.1. &rarr; 2.1.1.), (30,3,None,2.1. &rarr; 2.1.), (29,2,None,2. &rarr; 2), (28,2,None,1. &rarr; 1), (22,2,Some(foo),aaa), (21,2,None,aaa), (20,2,None,test4), (19,5,None,test3), (16,3,None,test1), (15,2,None,aaa))\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser org$blackquill$engine$BQParser$$surroundByGeneralTAG\nINFO: <header>\\\\,<ul style=\"list-style:none\" id=\"toc\"><nav>\\\\,<li><a href=\"#2:aaa:15\" ><h2>aaa</h2></a></li>\\,<ul style=\"list-style:none\" >\\\\,<li><a href=\"#3:test1:16\" ><h3>test1</h3></a></li>\\,<ul style=\"list-style:none\" >\\\\,<li><a href=\"#5:test3:19\" ><h5>test3</h5></a></li>\\,</ul>\\\\,</ul>\\\\,<li><a href=\"#2:test4:20\" ><h2>test4</h2></a></li>\\,<li><a href=\"#2:aaa:21\" ><h2>aaa</h2></a></li>\\,<li><a href=\"#foo\" ><h2>aaa</h2></a></li>\\,<li><a href=\"#2:1. &rarr; 1:28\" ><h2>1. &rarr; 1</h2></a></li>\\,<li><a href=\"#2:2. &rarr; 2:29\" ><h2>2. &rarr; 2</h2></a></li>\\,<ul style=\"list-style:none\" >\\\\,<li><a href=\"#3:2.1. &rarr; 2.1.:30\" ><h3>2.1. &rarr; 2.1.</h3></a></li>\\,<ul style=\"list-style:none\" >\\\\,<li><a href=\"#4:2.1.1. &rarr; 2.1.1.:31\" ><h4>2.1.1. &rarr; 2.1.1.</h4></a></li>\\,</ul>\\\\,</ul>\\\\,<li><a href=\"#3:2.2. &rarr; 2.2.:32\" ><h3>2.2. &rarr; 2.2.</h3></a></li>\\,<ul style=\"list-style:none\" >\\\\,<li><a href=\"#4:2.2.1. &rarr; 2.2.1:33\" ><h4>2.2.1. &rarr; 2.2.1</h4></a></li>\\,</ul>\\\\,<li><a href=\"#3:2.3. &rarr; 2.3.:34\" ><h3>2.3. &rarr; 2.3.</h3></a></li>\\,<li><a href=\"#2:3. &rarr; 3.:35\" ><h2>3. &rarr; 3.</h2></a></li>\\,</nav></ul>\\,</header>\\\\,{nrange:2-6}\\\\,\\\\,\\\\,<dl>\\\\,<dt>aaa</dt><dd>bbb</dd>\\\\,<dt>ccc</dt><dd>dddddd</dd>\\\\,<dd>eee</dd>\\\\,<dd>ffff</dd>\\\\,\\\\,</dl>\\\\,<span style=\" color:red; background-color:yellow;()\">aaa</span> \\\\,<span style=\" color:#00FF00; font-size:larger; font-weight:light font-family:'Times','suns';()\">bbb</span> \\\\,<span style=\" color:#FFFFFF; background-color:#000000; font-size:larger; font-weight:bolder font-family:'Times';()\">bbb</span> \\\\,<span style=\" color:red; font-size:larger; font-weight:bolder font-family:'Times'; text-decoration:overline;\">bbb</span> \\\\,<h2 id=\"2:aaa:15\">aaa</h2>\\,<h3 id=\"3:test1:16\">test1</h3>\\,aaaaaaaa55555\\\\,aaaa\\\\,<h5 id=\"5:test3:19\">test3</h5>\\,<h2 id=\"2:test4:20\">test4</h2>\\,<h2 id=\"2:aaa:21\">aaa</h2>\\,<h2 id=\"foo\">aaa</h2>\\\\,\\\\,aaaaaaa <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn><mo>+</mo><mn>2</mn></mrow><annotation encoding=\"SnuggleTeX\">$1+2 $</annotation></semantics></math> bbbbbbbb\\\\,<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>A</mi><mo>=</mo><mfrac><mrow><mi>&alpha;</mi><mo>+</mo><mi>&beta;</mi></mrow><mrow><mi>&gamma;</mi><mo>+</mo><mi>&delta;</mi></mrow></mfrac></mrow><annotation encoding=\"SnuggleTeX\">$ A = \\frac{\\alpha + \\beta}{\\gamma + \\delta} $</annotation></semantics></math>\\\\,aaaaaaaaaaaaa\\\\,\\\\,<h2 id=\"2:1. &rarr; 1:28\">1. &rarr; 1</h2>\\,<h2 id=\"2:2. &rarr; 2:29\">2. &rarr; 2</h2>\\,<h3 id=\"3:2.1. &rarr; 2.1.:30\">2.1. &rarr; 2.1.</h3>\\,<h4 id=\"4:2.1.1. &rarr; 2.1.1.:31\">2.1.1. &rarr; 2.1.1.</h4>\\,<h3 id=\"3:2.2. &rarr; 2.2.:32\">2.2. &rarr; 2.2.</h3>\\,<h4 id=\"4:2.2.1. &rarr; 2.2.1:33\">2.2.1. &rarr; 2.2.1</h4>\\,<h3 id=\"3:2.3. &rarr; 2.3.:34\">2.3. &rarr; 2.3.</h3>\\,<h2 id=\"2:3. &rarr; 3.:35\">3. &rarr; 3.</h2>\\,\\\\,|-:b=1 solid gray w=300 rad=10------------|\\\\,aaaaaa\\\\,<h1 >qqqqqq</h1>\\\\,|-:b=2 solid gray w=200 rad=10------------|\\\\,aaaaaa\\\\,|______|\\\\,cccccc\\\\,|_________________________________________|\\\\,\nJul 11, 2013 10:10:04 AM org.blackquill.engine.BQParser org$blackquill$engine$BQParser$$surroundByGeneralTAG\nINFO: <header>\\\\,<ul style=\"list-style:none\" id=\"toc\"><nav>\\\\,<li><a href=\"#2:aaa:15\" ><h2>aaa</h2></a></li>\\,<ul style=\"list-style:none\" >\\\\,<li><a href=\"#3:test1:16\" ><h3>test1</h3></a></li>\\,<ul style=\"list-style:none\" >\\\\,<li><a href=\"#5:test3:19\" ><h5>test3</h5></a></li>\\,</ul>\\\\,</ul>\\\\,<li><a href=\"#2:test4:20\" ><h2>test4</h2></a></li>\\,<li><a href=\"#2:aaa:21\" ><h2>aaa</h2></a></li>\\,<li><a href=\"#foo\" ><h2>aaa</h2></a></li>\\,<li><a href=\"#2:1. &rarr; 1:28\" ><h2>1. &rarr; 1</h2></a></li>\\,<li><a href=\"#2:2. &rarr; 2:29\" ><h2>2. &rarr; 2</h2></a></li>\\,<ul style=\"list-style:none\" >\\\\,<li><a href=\"#3:2.1. &rarr; 2.1.:30\" ><h3>2.1. &rarr; 2.1.</h3></a></li>\\,<ul style=\"list-style:none\" >\\\\,<li><a href=\"#4:2.1.1. &rarr; 2.1.1.:31\" ><h4>2.1.1. &rarr; 2.1.1.</h4></a></li>\\,</ul>\\\\,</ul>\\\\,<li><a href=\"#3:2.2. &rarr; 2.2.:32\" ><h3>2.2. &rarr; 2.2.</h3></a></li>\\,<ul style=\"list-style:none\" >\\\\,<li><a href=\"#4:2.2.1. &rarr; 2.2.1:33\" ><h4>2.2.1. &rarr; 2.2.1</h4></a></li>\\,</ul>\\\\,<li><a href=\"#3:2.3. &rarr; 2.3.:34\" ><h3>2.3. &rarr; 2.3.</h3></a></li>\\,<li><a href=\"#2:3. &rarr; 3.:35\" ><h2>3. &rarr; 3.</h2></a></li>\\,</nav></ul>\\,</header>\\\\,{nrange:2-6}\\\\,\\\\,\\\\,<dl>\\\\,<dt>aaa</dt><dd>bbb</dd>\\\\,<dt>ccc</dt><dd>dddddd</dd>\\\\,<dd>eee</dd>\\\\,<dd>ffff</dd>\\\\,\\\\,</dl>\\\\,<span style=\" color:red; background-color:yellow;()\">aaa</span> \\\\,<span style=\" color:#00FF00; font-size:larger; font-weight:light font-family:'Times','suns';()\">bbb</span> \\\\,<span style=\" color:#FFFFFF; background-color:#000000; font-size:larger; font-weight:bolder font-family:'Times';()\">bbb</span> \\\\,<span style=\" color:red; font-size:larger; font-weight:bolder font-family:'Times'; text-decoration:overline;\">bbb</span> \\\\,<h2 id=\"2:aaa:15\">aaa</h2>\\,<h3 id=\"3:test1:16\">test1</h3>\\,aaaaaaaa55555\\\\,aaaa\\\\,<h5 id=\"5:test3:19\">test3</h5>\\,<h2 id=\"2:test4:20\">test4</h2>\\,<h2 id=\"2:aaa:21\">aaa</h2>\\,<h2 id=\"foo\">aaa</h2>\\\\,\\\\,aaaaaaa <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn><mo>+</mo><mn>2</mn></mrow><annotation encoding=\"SnuggleTeX\">$1+2 $</annotation></semantics></math> bbbbbbbb\\\\,<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>A</mi><mo>=</mo><mfrac><mrow><mi>&alpha;</mi><mo>+</mo><mi>&beta;</mi></mrow><mrow><mi>&gamma;</mi><mo>+</mo><mi>&delta;</mi></mrow></mfrac></mrow><annotation encoding=\"SnuggleTeX\">$ A = \\frac{\\alpha + \\beta}{\\gamma + \\delta} $</annotation></semantics></math>\\\\,aaaaaaaaaaaaa\\\\,\\\\,<h2 id=\"2:1. &rarr; 1:28\">1. &rarr; 1</h2>\\,<h2 id=\"2:2. &rarr; 2:29\">2. &rarr; 2</h2>\\,<h3 id=\"3:2.1. &rarr; 2.1.:30\">2.1. &rarr; 2.1.</h3>\\,<h4 id=\"4:2.1.1. &rarr; 2.1.1.:31\">2.1.1. &rarr; 2.1.1.</h4>\\,<h3 id=\"3:2.2. &rarr; 2.2.:32\">2.2. &rarr; 2.2.</h3>\\,<h4 id=\"4:2.2.1. &rarr; 2.2.1:33\">2.2.1. &rarr; 2.2.1</h4>\\,<h3 id=\"3:2.3. &rarr; 2.3.:34\">2.3. &rarr; 2.3.</h3>\\,<h2 id=\"2:3. &rarr; 3.:35\">3. &rarr; 3.</h2>\\,\\\\,|-:b=1 solid gray w=300 rad=10------------|\\\\,aaaaaa\\\\,<h1 >qqqqqq</h1>\\\\,|-:b=2 solid gray w=200 rad=10------------|\\\\,aaaaaa\\\\,|______|\\\\,cccccc\\\\,|_________________________________________|\\\\,\nJul 11, 2013 10:10:04 AM org.blackquill.main.BlackQuill$ blackquill\nINFO: <!DOCTYPE html>\n<head>\n<title>test1</title>\n</head>\n<html>\n<body>\n<header>\n<ul style=\"list-style:none\" id=\"toc\"><nav>\n<li><a href=\"#2:aaa:15\" ><h2>aaa</h2></a></li>\n<ul style=\"list-style:none\" >\n<li><a href=\"#3:test1:16\" ><h3>test1</h3></a></li>\n<ul style=\"list-style:none\" >\n<li><a href=\"#5:test3:19\" ><h5>test3</h5></a></li>\n</ul>\n</ul>\n<li><a href=\"#2:test4:20\" ><h2>test4</h2></a></li>\n<li><a href=\"#2:aaa:21\" ><h2>aaa</h2></a></li>\n<li><a href=\"#foo\" ><h2>aaa</h2></a></li>\n<li><a href=\"#2:1. &rarr; 1:28\" ><h2>1. &rarr; 1</h2></a></li>\n<li><a href=\"#2:2. &rarr; 2:29\" ><h2>2. &rarr; 2</h2></a></li>\n<ul style=\"list-style:none\" >\n<li><a href=\"#3:2.1. &rarr; 2.1.:30\" ><h3>2.1. &rarr; 2.1.</h3></a></li>\n<ul style=\"list-style:none\" >\n<li><a href=\"#4:2.1.1. &rarr; 2.1.1.:31\" ><h4>2.1.1. &rarr; 2.1.1.</h4></a></li>\n</ul>\n</ul>\n<li><a href=\"#3:2.2. &rarr; 2.2.:32\" ><h3>2.2. &rarr; 2.2.</h3></a></li>\n<ul style=\"list-style:none\" >\n<li><a href=\"#4:2.2.1. &rarr; 2.2.1:33\" ><h4>2.2.1. &rarr; 2.2.1</h4></a></li>\n</ul>\n<li><a href=\"#3:2.3. &rarr; 2.3.:34\" ><h3>2.3. &rarr; 2.3.</h3></a></li>\n<li><a href=\"#2:3. &rarr; 3.:35\" ><h2>3. &rarr; 3.</h2></a></li>\n</nav></ul>\n</header>\n<p>{nrange:2-6}</p>\n<dl>\n<dt>aaa</dt><dd>bbb</dd>\n<dt>ccc</dt><dd>dddddd</dd>\n<dd>eee</dd>\n<dd>ffff</dd>\n\n</dl>\n<p><span style=\" color:red; background-color:yellow;()\">aaa</span> </p>\n<p><span style=\" color:#00FF00; font-size:larger; font-weight:light font-family:'Times','suns';()\">bbb</span> </p>\n<p><span style=\" color:#FFFFFF; background-color:#000000; font-size:larger; font-weight:bolder font-family:'Times';()\">bbb</span> </p>\n<p><span style=\" color:red; font-size:larger; font-weight:bolder font-family:'Times'; text-decoration:overline;\">bbb</span> </p>\n<h2 id=\"2:aaa:15\">aaa</h2>\n<h3 id=\"3:test1:16\">test1</h3>\n<p>aaaaaaaa55555</p>\n<p>aaaa</p>\n<h5 id=\"5:test3:19\">test3</h5>\n<h2 id=\"2:test4:20\">test4</h2>\n<h2 id=\"2:aaa:21\">aaa</h2>\n<h2 id=\"foo\">aaa</h2>\n<p>aaaaaaa <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn><mo>+</mo><mn>2</mn></mrow><annotation encoding=\"SnuggleTeX\">$1+2 $</annotation></semantics></math> bbbbbbbb</p>\n<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>A</mi><mo>=</mo><mfrac><mrow><mi>&alpha;</mi><mo>+</mo><mi>&beta;</mi></mrow><mrow><mi>&gamma;</mi><mo>+</mo><mi>&delta;</mi></mrow></mfrac></mrow><annotation encoding=\"SnuggleTeX\">$ A = \\frac{\\alpha + \\beta}{\\gamma + \\delta} $</annotation></semantics></math></p>\n<p>aaaaaaaaaaaaa</p>\n<h2 id=\"2:1. &rarr; 1:28\">1. &rarr; 1</h2>\n<h2 id=\"2:2. &rarr; 2:29\">2. &rarr; 2</h2>\n<h3 id=\"3:2.1. &rarr; 2.1.:30\">2.1. &rarr; 2.1.</h3>\n<h4 id=\"4:2.1.1. &rarr; 2.1.1.:31\">2.1.1. &rarr; 2.1.1.</h4>\n<h3 id=\"3:2.2. &rarr; 2.2.:32\">2.2. &rarr; 2.2.</h3>\n<h4 id=\"4:2.2.1. &rarr; 2.2.1:33\">2.2.1. &rarr; 2.2.1</h4>\n<h3 id=\"3:2.3. &rarr; 2.3.:34\">2.3. &rarr; 2.3.</h3>\n<h2 id=\"2:3. &rarr; 3.:35\">3. &rarr; 3.</h2>\n<div style=\"border:1px solid gray; width:300px;border-radius:10px;\"> \naaaaaa\n<h1 >qqqqqq</h1>\n<div style=\"border:2px solid gray; width:200px;border-radius:10px;\"> \naaaaaa\n</div>\n\n</body>\n</html>\n",
+			"settings":
+			{
+				"buffer_size": 21995,
+				"line_ending": "Unix",
+				"name": "Ensime output",
+				"scratch": true
+			}
+		},
+		{
+			"contents": "",
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Unix",
+				"name": "Ensime watches",
+				"scratch": true
+			}
+		},
+		{
+			"file": "/Users/set/Desktop/arduino/LED/LED.ino",
+			"settings":
+			{
+				"buffer_size": 837,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 389.0,
+		"selected_items":
+		[
+			[
+				"Gre",
+				"GrepCode Search"
+			],
+			[
+				":insta",
+				"Package Control: Install Package"
+			],
+			[
+				":w",
+				":w - Save"
+			],
+			[
+				":W",
+				":w - Save"
+			],
+			[
+				":",
+				"Ensime: Session"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"package",
+				"Package Control: Remove Package"
+			],
+			[
+				"packa",
+				"Package Control: Remove Package"
+			],
+			[
+				"ensime",
+				"Ensime: Build"
+			],
+			[
+				"ensime:start",
+				"Ensime: Restart"
+			],
+			[
+				"install ",
+				"Package Control: Install Package"
+			],
+			[
+				"install pack",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 449.0
+	},
+	"console":
+	{
+		"height": 125.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/set/Desktop/arduino/LED.ino",
+		"/Users/set/Desktop/arduino/PWM.ino",
+		"/Users/set/Desktop/sbt-projects/BlackQuill/src/main/scala/org/blackquill/engine/BQParser.scala",
+		"/Users/set/Desktop/sbt-projects/BlackQuill/src/test/scala/MarkdownSpecification.scala",
+		"/Users/set/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/Users/set/Desktop/sbt-projects/BlackQuill/.ensime_session",
+		"/Users/set/Library/Application Support/Sublime Text 2/Packages/User/Default (OSX).sublime-keymap",
+		"/Users/set/Library/Application Support/Sublime Text 2/Packages/Ensime/Default (OSX).sublime-keymap",
+		"/Users/set/Library/Application Support/Sublime Text 2/Packages/Ensime/Ensime.sublime-settings",
+		"/Users/set/Library/Application Support/Sublime Text 2/Packages/MarkdownEditing/Markdown.sublime-settings",
+		"/Users/set/Library/Application Support/Sublime Text 2/Packages/Package Control/Package Control.sublime-settings",
+		"/Users/set/Library/Application Support/Sublime Text 2/Packages/User/sbt.sublime-build",
+		"/Users/set/Desktop/sbt-projects/BlackQuill/.ensime",
+		"/Users/set/Library/Application Support/Sublime Text 2/Packages/User/Markdown.sublime-settings",
+		"/private/tmp/Fonts 2/SVG/Mathematica1-Bold.svg",
+		"/Users/set/Library/Application Support/Sublime Text 2/Packages/Default/Preferences.sublime-settings"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"CSS",
+			"\"\"\"^(.*)\\|\\-:\\{(.*?)\\}\\|(.*?)\"\"\"",
+			";\">",
+			"late",
+			"fencedBoxByClass",
+			"following",
+			"twitter"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "src/main/scala/org/blackquill/main/BlackQuill.scala",
+					"settings":
+					{
+						"buffer_size": 4026,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3989,
+								3989
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Scala/Scala.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/main/scala/org/blackquill/engine/BQParser.scala",
+					"settings":
+					{
+						"buffer_size": 40827,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								21106,
+								21106
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Scala/Scala.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 10543.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "mdTest/test16.bq",
+					"settings":
+					{
+						"buffer_size": 702,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								657,
+								657
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Markdown/Markdown.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/Users/set/Desktop/BlackQuill Test/ex2.html",
+					"settings":
+					{
+						"buffer_size": 3196,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3196,
+								3196
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 712.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/main/scala/org/blackquill/breadboard/LaTeXConverter.scala",
+					"settings":
+					{
+						"buffer_size": 680,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								526,
+								526
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Scala/Scala.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/main/scala/org/blackquill/engine/HTMLMap.scala",
+					"settings":
+					{
+						"buffer_size": 9505,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								766,
+								766
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Scala/Scala.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": ".ensime_session",
+					"settings":
+					{
+						"buffer_size": 581,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Ensime/DotSession.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 7,
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 9,
+					"settings":
+					{
+						"buffer_size": 21995,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								21995,
+								21995
+							]
+						],
+						"settings":
+						{
+							"result_base_dir": "/Users/set/Desktop/sbt-projects/BlackQuill",
+							"result_file_regex": "([:.a-z_A-Z0-9\\\\/-]+[.](?:scala|java)):([0-9]+)",
+							"result_line_regex": "",
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 8735.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "/Users/set/Desktop/arduino/LED/LED.ino",
+					"settings":
+					{
+						"buffer_size": 837,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 34.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				2
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			],
+			[
+				1,
+				1,
+				2,
+				2
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.65,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			0.65,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 206.0
+	},
+	"output.tests":
+	{
+		"height": 106.0
+	},
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 217.0,
+	"status_bar_visible": true
+}

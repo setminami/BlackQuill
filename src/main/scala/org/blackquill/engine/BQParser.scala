@@ -18,6 +18,7 @@ import scala.xml._
 
 import org.blackquill.engine._
 import org.blackquill.io.FileIO
+import org.blackquill.breadboard.Latexconverter
 
 
 class BQParser {
@@ -27,8 +28,16 @@ class BQParser {
 	private var footnoteMap = new LinkedHashMap[String,Tuple2[String,String]]
 	private var headerMap = List[Tuple4[Int,Int,String,String]]()
 
+	private var nRange = (-1,-1)
+	private var nStack = Stack[Tuple3[Int,Int,String]]()
+
+	private val texSignStart = """\\begin\{TeX\}"""
+	private val texSignEnd = """\\end\{TeX\}"""
+
 	private val Syntax = LinkedHashMap(
-	//STRONG
+	//Early
+	"""^(.*?)(%{1,6})\x20(.*?)(\\,.*?)$$""" -> ("h", autoNumberingHeader _),
+	s"""^(.*?)$texSignStart(.*?)$texSignEnd(.*?)$$""" -> ("", laTeXConvert _),
 	"""^(.*?)(([^(?:\\,)]+?\\,(:(.+?)\\,)+)+)(.*?)$$""" -> ("dl", wordDefinition _),
 	"""(.*)\\,~{3,}(?:\{(.+?)\})?(\\,.+\\,)~{3,}\\,(.*)""" -> ("code", fencedCode _),
 	"""^(.*?)(?:\[(.+?)\](?:\{(.+?)\})?\\,)?((\|.+?)+?\|)\\,((\|:?\-{3,}:?)+?\|)\\,(((\|.+?\|?)+?\\,)+?)\\,(.*?)$$"""
@@ -53,9 +62,178 @@ class BQParser {
 	"""^(.*?)(\{toc(:.+?)?\})(.*)$$""" -> ("ul",generateTOC _),
 	"^(.*\\\\,)((?:\\-|\\*){3,}|(?:(?:\\-|\\*)\\x20){3,})(.*?)$$" -> ("hr",putHrTAG _),
 	"^(.*?)\\*\\*(.+?)\\*\\*(.*?)$$" -> ("strong",surroundByGeneralTAG _),
-	"^(.*?)\\*(.+?)\\*(.*?)$$" -> ("em",surroundByGeneralTAG _)
-	//WEAK
+	"^(.*?)\\*(.+?)\\*(.*?)$$" -> ("em",surroundByGeneralTAG _),
+	"""^(.*)\|\-:b\s*=\s*(\d+?)\s*(\w*?)\s*(#?[\w\d]+?)\sw\s*=\s*(\d+?)\srad\s*=\s*(\d+?)\-+?\|(.*?)$$""" -> ("div",fencedBox _),
+	"""^(.*)\|\-:\{(.*?)\}\|(.*?)""" -> ("div",fencedBoxByClass _)
+	//late
 	)
+
+	private def fencedBoxByClass(doc:String, regex:String, TAG:String):String = {
+		val p = new Regex(regex,"before","class","following")
+		val m = p findFirstMatchIn(doc)
+
+		if(m != None){
+			val bef = m.get.group("before")
+			val fol = m.get.group("following")
+
+			val class = m.get.group("class")
+
+		}
+		doc
+	}
+
+	private def _searchEndMark(doc:String,regex:String,TAG:String):String = {
+		val p2 = """^(.*?)\|_{3,}\|(.*?)$$""".r
+		val m2 = p2 findFirstMatchIn(doc)
+
+		if(m2 != None){
+			val p3 = """(.*)\|\-:.*?\\,(.*)""".r
+			val m3 = p3 findFirstMatchIn(m2.get.group(1))
+			if(m3 != None){
+				return fencedBox(m2.get.group(2),regex,TAG)
+			}else{
+				return m2.get.group(1) + "</div>" + _searchEndMark(m2.get.group(2),regex,TAG)
+			}
+		}//else{
+			//log error "fenced box ERROR: not Found break Mark"
+			//exit(-1)
+		//}
+		doc
+	}
+
+	private def fencedBox(doc:String, regex:String, TAG:String):String = {
+
+		val p = new Regex(regex,"before","border","style","color","width","rad","following")
+		val m = p findFirstMatchIn(doc)
+
+		if(m != None){
+			val bef = m.get.group("before")
+			val fol = m.get.group("following")
+
+			val borderW = if(m.get.group("border") != None){
+				m.get.group("border") + "px "
+			}else{"1"}
+			val borderStyle = if(m.get.group("style") != None){
+				m.get.group("style")
+			}else{"solid"}
+			val borderColor = if(m.get.group("color") != None){
+				" " + m.get.group("color")
+			}else{"black"}
+			val boxW = if(m.get.group("width") != None){
+				m.get.group("width") + "px"
+			}else{
+				log error "FENCED BOX WIDTH is not set."
+				exit(-1)
+			}
+			val boxRad = if(m.get.group("rad") != None){
+				m.get.group("rad") + "px"
+			}else{"10px"}
+
+			val div =
+			s"""<$TAG style="border:$borderW$borderStyle$borderColor; width:$boxW;""" +
+			s"""border-radius:$boxRad;"> """
+
+			return fencedBox(bef,regex,TAG) + div + _searchEndMark(fol,regex,TAG)
+		}
+		doc
+	}
+
+	private def autoNumberingHeader(doc:String, regex:String, TAG:String):String = {
+		def _popTheWastes(i:Int):Stack[Tuple3[Int,Int,String]] = {
+			if(nStack.top._1 > i){
+				nStack.pop
+			}else if(nStack.top._1 == i){
+				val top = nStack.pop
+				nStack.push(Tuple3[Int,Int,String](top._1,top._2 + 1,"." + top._3))
+				return nStack
+			}
+			return _popTheWastes(i)
+		}
+
+		val p = new Regex(regex,"before","hSize","inTAG","following")
+		val m = p findFirstMatchIn(doc)
+
+		if(m != None){
+			val bef = m.get.group("before")
+			val fol = m.get.group("following")
+			val inTAG = m.get.group("inTAG")
+
+			val sizeCheck = if(nRange._1 != -1){nRange._1 + m.get.group("hSize").size}else{0}
+			val headSize = if(sizeCheck != 0 && sizeCheck - 1 < nRange._2){sizeCheck - 1}else{
+				log error "Auto Numbering header FATAL Error. % anotation overflowed. Check nrange value and % sequences again. You can use sequence % - " + "%" * (nRange._2 - nRange._1)
+				log info nRange
+				exit(-1)
+			}
+
+			if(nStack.isEmpty){
+				if(nRange._1 != -1 && nRange._2 != -1){
+					nStack.push(Tuple3[Int,Int,String](headSize,1,"." + inTAG))
+				}else{
+					log error "Auto numbering header Error. {nrange..} notation is not set, but found % anotation. You can use sequence % - " + "%" * (nRange._2 - nRange._1)
+					exit(-1)
+				}
+			}else if(nStack.top._1 < headSize){
+				nStack.push(Tuple3[Int,Int,String](headSize,1,"." + inTAG))
+			}else if(nStack.top._1 > headSize){
+				nStack = _popTheWastes(headSize)
+			}else if(nStack.top._1 == headSize){
+				val top = nStack.pop
+				nStack.push(Tuple3[Int,Int,String](top._1,top._2 + 1,top._3))
+			}
+
+			val hSize = nStack.top._1
+			var number = ""
+			for(e <- nStack.toList.reverse){number += e._2 + "."}
+			return autoNumberingHeader(bef,regex,TAG) + s"""<$TAG$hSize>$number $inTAG</$TAG$hSize>""" +
+			autoNumberingHeader(fol,regex,TAG)
+		}
+		doc
+	}
+
+	private def autoNumberSetting(doc:String):String = {
+		val p = """^(.*?)(\{nrange(:h?\d?\-h?\d?)?\})(.*?)$$""".r
+		val m = p findFirstMatchIn(doc)
+
+		if(m != None){
+			lazy val ret = m.get.group(1) + m.get.group(4)
+
+			if(Option(m.get.group(3)) != None){
+				val p2 = """:(h?(\d)?\-h?(\d)?)""".r
+				val m2 = p2 findFirstMatchIn(m.get.group(3))
+
+				if(m2 != None){
+					val start = if(Option(m2.get.group(2)) != None){
+						m2.get.group(2).toInt
+					}else{1}
+					val end = if(Option(m2.get.group(3)) != None){
+						m2.get.group(3).toInt
+					}else{6}
+					nRange = (start,end)
+					ret
+				}else{
+					return ret
+				}
+			}
+		}
+		doc
+	}
+
+	private def laTeXConvert(doc:String, regex:String, TAG:String):String = {
+		if(doc == ""){return ""}
+		val p = new Regex(regex, "before","tex","following")
+		val m = p findFirstMatchIn(doc)
+
+		if(m != None){
+			val bef = m.get.group("before")
+			val fol = m.get.group("following")
+			val conv = new Latexconverter
+
+			return laTeXConvert(bef,regex,TAG) +
+			conv.Convert(m.get.group("tex")) +
+			laTeXConvert(fol,regex,TAG)
+		}
+		doc
+	}
 
 	private def colorPen(doc:String, regex:String, TAG:String):String = {
 		lazy val fontSize = Map[Int,String](0 -> "medium", 1 -> "larger", 2 -> "large", 3 -> "x-large", 4 -> "xx-large",
@@ -70,7 +248,15 @@ class BQParser {
 			val fol = m.get.group("following")
 
 			if(Option(m.get.group("content")) != None){
-				val content = m.get.group("content")
+				var content = m.get.group("content")
+				val textDec = if(content.head == content.last){
+					  content.head match{
+					    case '~' => content = content.tail.init;" text-decoration:overline;"
+					    case '-' => content = content.tail.init;" text-decoration:line-through;"
+					    case '_' => content = content.tail.init;" text-decoration:underline;"
+					    case _ =>
+					  }
+					}else{""}
 				val fgColor = if(Option(m.get.group("fcolor")) != None){" color:" + m.get.group("fcolor") + ";"}else{""}
 				val bgColor = if(Option(m.get.group("bcolor")) != None){" background-color:" + m.get.group("bcolor").tail + ";"}else{""}
 
@@ -94,7 +280,7 @@ class BQParser {
 					}else{""}
 
 				return colorPen(bef, regex, TAG) +
-						s"""<span style="$fgColor$bgColor$fSize$fWeight$fFace">$content</span> """ +
+						s"""<span style="$fgColor$bgColor$fSize$fWeight$fFace$textDec">$content</span> """ +
 						colorPen(fol, regex, TAG)
 			}else{
 				return colorPen(bef, regex, TAG) + colorPen(fol, regex, TAG)
@@ -104,7 +290,7 @@ class BQParser {
 	}
 
 	private def generateTOC(doc:String, regex:String, TAG:String):String = {
-	  	log debug doc
+	  	log info doc
 
 		def _checkRange(start:Option[String],end:Option[String],default:Tuple2[Int,Int]):Tuple2[Int,Int] = {
 			val s = if(start != None && start.get.toInt >= default._1){start.get.toInt}else{default._1}
@@ -980,7 +1166,7 @@ class BQParser {
 				  surroundByHeadTAG(fol,regex,TAG)
 		}
 	  doc
-	}
+}
 
 	private def surroundByGeneralTAG(doc:String, regex:String, TAG:String):String = {
 	  if(doc == ""||Option(doc) == None){return ""}
@@ -1014,6 +1200,7 @@ class BQParser {
 	def preProcessors(doc:String) :String = {
 	 var text = urlDefinitions(doc)
 	 text = gatheringFootnotesDefinition(text)
+	 text = autoNumberSetting(text)
 	 text
 	}
 
@@ -1029,8 +1216,8 @@ class BQParser {
 
 		md = backslashEscape(md)
 		md = paragraphize(md)
-	  	log info urlDefMap
-	  	log info footnoteMap
+	  	log debug urlDefMap
+	  	log debug footnoteMap
 	  	md += insertFootnoteDefinitions(footnoteMap)
 	  	val header = constructHEADER(markdown)
 		s"${docType}\n${header}\n<${htmlTAG}>\n<${bodyTAG}>\n${md.replaceAll("\\\\,","\n")}\n</${bodyTAG}>\n</${htmlTAG}>"

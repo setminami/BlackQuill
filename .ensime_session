@@ -1,0 +1,23 @@
+{
+  "breakpoints": [
+    {
+      "file_name": "/Users/set/Desktop/sbt-projects/BlackQuill/src/test/scala/MarkdownSpecification.scala", 
+      "line": 1
+    }
+  ], 
+  "current_launch_config": "Test16", 
+  "launch_configs": [
+    {
+      "args": "", 
+      "main_class": "org.blackquill.test.MarkdownSpecification", 
+      "name": "scalaCheck", 
+      "remote_address": ""
+    }, 
+    {
+      "args": "/Users/set/Desktop/sbt-projects/BlackQuill/mdTest/test16.bq", 
+      "main_class": "org.blackquill.main.BlackQuill", 
+      "name": "Test16", 
+      "remote_address": ""
+    }
+  ]
+}

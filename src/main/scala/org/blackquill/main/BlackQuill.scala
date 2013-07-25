@@ -15,11 +15,11 @@ object BlackQuill{
   private val log:Log = LogFactory.getLog(BlackQuill.getClass)
 
   val VERSION = "0.1.0"
-  val lastDate = "May 14 2013"
+  val lastDate = "july 25 2013"
 
-  val wiki = "https://github.com/setminami/BlackQuill/wiki/"
-  val syntax = "BlackQuill-Details-of-Syntax"
-  val philosophy = "BlackQuill-Philosophy"
+  val wiki = "https://www.setminami.net/BlackQuill/"
+  val syntax = "index.html#Syntax"
+  val philosophy = "index.html#Philosophy"
 
   val options =
     "--force|-f : Force conversion. BQ ignore timestamps of markdown files.\n" +
