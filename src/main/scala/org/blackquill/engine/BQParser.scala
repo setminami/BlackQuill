@@ -63,8 +63,8 @@ class BQParser {
 	"^(.*\\\\,)((?:\\-|\\*){3,}|(?:(?:\\-|\\*)\\x20){3,})(.*?)$$" -> ("hr",putHrTAG _),
 	"^(.*?)\\*\\*(.+?)\\*\\*(.*?)$$" -> ("strong",surroundByGeneralTAG _),
 	"^(.*?)\\*(.+?)\\*(.*?)$$" -> ("em",surroundByGeneralTAG _),
-	"""^(.*)\|\-:b\s*=\s*(\d+?)\s*(\w*?)\s*(#?[\w\d]+?)\sw\s*=\s*(\d+?)\srad\s*=\s*(\d+?)\-+?\|(.*?)$$""" -> ("div",fencedBox _),
-	"""^(.*)\|\-:\{(.*?)\}\|(.*?)""" -> ("div",fencedBoxByClass _)
+	"""^(.*)\|\-:b\s*=\s*(\d+?)\s*(\w*?)\s*(#?[\w\d]+?)\sw\s*=\s*(\d+?)\srad\s*=\s*(\d+?)\-+?\|(.*?)$$""" -> ("div",fencedBox _)
+	//"""^(.*)\|\-:\{(.*?)\}\|(.*?)""" -> ("div",fencedBoxByClass _)
 	//late
 	)
 
@@ -76,7 +76,7 @@ class BQParser {
 			val bef = m.get.group("before")
 			val fol = m.get.group("following")
 
-			val class = m.get.group("class")
+			val claz = m.get.group("class")
 
 		}
 		doc
@@ -194,8 +194,8 @@ class BQParser {
 		val p = """^(.*?)(\{nrange(:h?\d?\-h?\d?)?\})(.*?)$$""".r
 		val m = p findFirstMatchIn(doc)
 
+		lazy val ret = m.get.group(1) + m.get.group(4)
 		if(m != None){
-			lazy val ret = m.get.group(1) + m.get.group(4)
 
 			if(Option(m.get.group(3)) != None){
 				val p2 = """:(h?(\d)?\-h?(\d)?)""".r
@@ -215,7 +215,7 @@ class BQParser {
 				}
 			}
 		}
-		doc
+		ret
 	}
 
 	private def laTeXConvert(doc:String, regex:String, TAG:String):String = {

@@ -11,6 +11,8 @@ import org.apache.commons.logging._
 import org.blackquill.engine._
 import org.blackquill.io._
 
+import java.io.PrintWriter
+
 object BlackQuill{
   private val log:Log = LogFactory.getLog(BlackQuill.getClass)
 
@@ -117,15 +119,21 @@ object BlackQuill{
     // - fileHandler.openMarkdownFromString(str:String)
     val text:List[String] = fileHandler openMarkdownFromFile(Switches.getInputfile)
     val output = blackquill(text)
-  //  log info output
+    val out = new PrintWriter(Switches.dirName + sufRegex.replaceAllIn(Switches.getInputfile,".html"))
+    output.foreach(out.print(_))
+    out.close
+    log info output
   }
 
   def blackquill(lines:List[String]):List[String] = {
     val str = new HTMLMap htmlTAGFilter lines.mkString("""\,""")
     log info str
     val parsed = new BQParser
-    log info parsed.toHTML(str)
-    str split """\,""" toList
+    val HTML = parsed.toHTML(str)
+    if(Switches.getStdout){
+      println(HTML)
+    }
+    HTML split """\,""" toList
   }
 
 }
