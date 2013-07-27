@@ -5,6 +5,7 @@ package org.blackquill.engine
 // BQParser.
 
 import org.apache.commons.logging._
+
 import scala.collection.immutable.List
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.HashMap
@@ -16,7 +17,14 @@ import scala.util.matching.Regex
 import scala.util.control.Breaks.{break,breakable}
 import scala.xml._
 
+import java.io.ByteArrayInputStream
+
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.DocumentBuilder
+
+//import org.w3c.dom
 import org.blackquill.engine._
+import org.blackquill.main._
 import org.blackquill.io.FileIO
 import org.blackquill.breadboard.Latexconverter
 
@@ -1222,6 +1230,16 @@ class BQParser {
 	  	val header = constructHEADER(markdown)
 		s"${docType}\n${header}\n<${htmlTAG}>\n<${bodyTAG}>\n${md.replaceAll("\\\\,","\n")}\n</${bodyTAG}>\n</${htmlTAG}>"
 	}
+
+	def toDOM(markdown:String):org.w3c.dom.Document = {
+		val stream = new ByteArrayInputStream(markdown.getBytes())
+
+		val factory = DocumentBuilderFactory.newInstance
+		factory.setNamespaceAware(true)
+		val builder = factory.newDocumentBuilder()
+		builder.parse(stream)
+	}
+
 
 	private def paragraphize(doc:String):String = {
 		val delimiter = """\,"""

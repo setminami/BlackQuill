@@ -72,6 +72,8 @@ object BlackQuill{
       encode = "UTF-8"
     }
 
+    var outputFile = ""
+
     private
     var inputFile = ""
     var force = false
@@ -86,8 +88,6 @@ object BlackQuill{
     var verbose = false
     var encFlag = false
     var encode = "UTF-8"
-
-
   }
 
   def main(args:Array[String]){
@@ -119,10 +119,10 @@ object BlackQuill{
     // - fileHandler.openMarkdownFromString(str:String)
     val text:List[String] = fileHandler openMarkdownFromFile(Switches.getInputfile)
     val output = blackquill(text)
-    val out = new PrintWriter(Switches.dirName + sufRegex.replaceAllIn(Switches.getInputfile,".html"))
+    Switches.outputFile = sufRegex.replaceAllIn(Switches.getInputfile,".html")
+    val out = new PrintWriter(Switches.dirName + Switches.outputFile)
     output.foreach(out.print(_))
     out.close
-    log info output
   }
 
   def blackquill(lines:List[String]):List[String] = {
@@ -136,4 +136,4 @@ object BlackQuill{
     HTML split """\,""" toList
   }
 
-}
+ }

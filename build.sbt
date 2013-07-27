@@ -1,8 +1,29 @@
+import AssemblyKeys._
+
+import Keys._
+
+import sbt._
+
+import sbtassembly.Plugin._
+
+
 name := "BlackQuill"
 
 version := "0.1.0"
 
 scalaVersion := "2.10.0"
+
+seq(assemblySettings: _*)
+
+mainClass in assembly := Some("org.blackquill.main")
+
+
+mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
+  {
+    case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+    case _ => MergeStrategy.first
+  }
+}
 
 scalacOptions ++= Seq("-encoding","UTF-8")
 
@@ -11,8 +32,6 @@ libraryDependencies ++= Seq(
 	"commons-io" % "commons-io" % "2.4",
   "commons-logging" % "commons-logging" % "1.0.4",
   "uk.ac.ed.ph.snuggletex" % "snuggletex-core" % "1.2.2",
-  "uk.ac.ed.ph.snuggletex" % "snuggletex-upconversion" % "1.2.2",
-  "uk.ac.ed.ph.snuggletex" % "snuggletex-jeuclid" % "1.2.2",
   "org.scalacheck" %% "scalacheck" % "1.10.1" % "test"
 )
 
@@ -24,3 +43,6 @@ resolvers ++= Seq(
  "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
   "Sonatype Releases" at "http://oss.sonatype.org/content/repositories/releases"
 )
+
+assemblySettings
+
