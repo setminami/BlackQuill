@@ -13,6 +13,12 @@ version := "0.1.0"
 
 scalaVersion := "2.10.0"
 
+publishMavenStyle := true
+
+publishArtifact in Test := false
+
+pomIncludeRepository := { _ => false }
+
 seq(assemblySettings: _*)
 
 mainClass in assembly := Some("org.blackquill.main")
@@ -43,6 +49,35 @@ resolvers ++= Seq(
  "Sonatype Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
   "Sonatype Releases" at "http://oss.sonatype.org/content/repositories/releases"
 )
+
+publishTo <<= version { (v: String) =>
+  val nexus = "https://oss.sonatype.org/"
+  if (v.trim.endsWith("SNAPSHOT"))
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+}
+
+pomExtra := (
+  <url>http://jsuereth.com/scala-arm</url>
+  <licenses>
+    <license>
+      <name>BSD-style</name>
+      <url>http://www.opensource.org/licenses/bsd-license.php</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>git@github.com:jsuereth/scala-arm.git</url>
+    <connection>scm:git:git@github.com:jsuereth/scala-arm.git</connection>
+  </scm>
+  <developers>
+    <developer>
+      <id>jsuereth</id>
+      <name>Josh Suereth</name>
+      <url>http://jsuereth.com</url>
+    </developer>
+  </developers>)
 
 assemblySettings
 
