@@ -71,8 +71,8 @@ class BQParser {
 	"^(.*\\\\,)((?:\\-|\\*){3,}|(?:(?:\\-|\\*)\\x20){3,})(.*?)$$" -> ("hr",putHrTAG _),
 	"^(.*?)\\*\\*(.+?)\\*\\*(.*?)$$" -> ("strong",surroundByGeneralTAG _),
 	"^(.*?)\\*(.+?)\\*(.*?)$$" -> ("em",surroundByGeneralTAG _),
-	"""^(.*)\|\-:b\s*=\s*(\d+?)\s*(\w*?)\s*(#?[\w\d]+?)\sw\s*=\s*(\d+?)\srad\s*=\s*(\d+?)\-+?\|(.*?)$$""" -> ("div",fencedBox _)
-	//"""^(.*)\|\-:\{(.*?)\}\|(.*?)""" -> ("div",fencedBoxByClass _)
+	"""^(.*)\|\-:b\s*=\s*(\d+?)\s*(\w*?)\s*(#?[\w\d]+?)\sw\s*=\s*(\d+?)\srad\s*=\s*(\d+?)\-+?\|(.*?)$$""" -> ("div",fencedBox _),
+	"""^(.*)\|\-:\{(.*?)\}\|(.*?)""" -> ("div",fencedBoxByClass _)
 	//late
 	)
 
@@ -85,7 +85,12 @@ class BQParser {
 			val fol = m.get.group("following")
 
 			val claz = m.get.group("class")
-
+			if(searchCSSClassName(doc,claz)){
+				return fencedBoxByClass(bef,regex,TAG) + s"""<$TAG class="$claz"> """ + _searchEndMark(fol,regex,TAG)
+			}else{
+				log error s"Class Name:$claz Not found"
+				exit(1)
+			}
 		}
 		doc
 	}
