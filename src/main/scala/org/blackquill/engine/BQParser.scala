@@ -206,10 +206,8 @@ class BQParser {
 	private def autoNumberSetting(doc:String):String = {
 		val p = """^(.*?)(\{nrange(:h?\d?\-h?\d?)?\})(.*?)$$""".r
 		val m = p findFirstMatchIn(doc)
-
-		lazy val ret = m.get.group(1) + m.get.group(4)
 		if(m != None){
-
+			lazy val ret = m.get.group(1) + m.get.group(4)
 			if(Option(m.get.group(3)) != None){
 				val p2 = """:(h?(\d)?\-h?(\d)?)""".r
 				val m2 = p2 findFirstMatchIn(m.get.group(3))
@@ -228,7 +226,7 @@ class BQParser {
 				}
 			}
 		}
-		ret
+		doc
 	}
 
 	private def laTeXConvert(doc:String, regex:String, TAG:String):String = {
