@@ -13,6 +13,8 @@ version := "0.1.0"
 
 scalaVersion := "2.10.0"
 
+organization := "net.setminami"
+
 publishMavenStyle := true
 
 publishArtifact in Test := false
@@ -68,14 +70,14 @@ pomExtra := (
     </license>
   </licenses>
   <scm>
-    <url>git@github.com:jsuereth/scala-arm.git</url>
-    <connection>scm:git:git@github.com:jsuereth/scala-arm.git</connection>
+    <url>git@github.com:setminami/BlackQuill</url>
+    <connection>scm:git:git@github.com:setminami/BlackQuill.git</connection>
   </scm>
   <developers>
     <developer>
-      <id>jsuereth</id>
-      <name>Josh Suereth</name>
-      <url>http://jsuereth.com</url>
+      <id>SetMinami</id>
+      <name>Setsushi Minami</name>
+      <url>http://setminami.net</url>
     </developer>
   </developers>)
 
