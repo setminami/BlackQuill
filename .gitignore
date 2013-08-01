@@ -3,8 +3,8 @@ Ico*
 project/target/config-classes
 .DS_Store
 .ensime
-.ensime*
-.sublime*
+.ensime_session
+*.sublime*
 .history
 .project
 .classpath
