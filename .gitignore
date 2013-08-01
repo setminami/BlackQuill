@@ -4,7 +4,7 @@ project/target/config-classes
 .DS_Store
 .ensime
 .ensime_session
-.ensime*
+.ensime_lucene
 *.sublime*
 .history
 .project
