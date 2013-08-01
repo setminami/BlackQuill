@@ -1,0 +1,2 @@
+#!/opt/local/bin/perl
+`/usr/bin/java -jar /Users/set/Desktop/sbt-projects/BlackQuill/target/scala-2.10/BlackQuill-assembly-0.1.0.jar @ARGV org.blackquill.main`

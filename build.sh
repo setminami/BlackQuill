@@ -6,7 +6,10 @@ else
 fi
 
 if which perl>/dev/null ; then
-	perl ./build.pl
+	perlPath=`which perl`
+	javaPath=`which java`
+	echo $perlPath
+	perl ./build.pl $perlPath $javaPath
 else
 	echo "perl is not found"
 fi

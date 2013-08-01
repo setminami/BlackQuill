@@ -23,8 +23,11 @@ pomIncludeRepository := { _ => false }
 
 seq(assemblySettings: _*)
 
+seq(aetherPublishSettings: _*)
+
 mainClass in assembly := Some("org.blackquill.main")
 
+credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
 
 mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   {
@@ -61,7 +64,7 @@ publishTo <<= version { (v: String) =>
 }
 
 pomExtra := (
-  <url>http://jsuereth.com/scala-arm</url>
+  <url>http://setminami.net/BlackQuill</url>
   <licenses>
     <license>
       <name>BSD-style</name>

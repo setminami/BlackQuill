@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 my $file = "./build.sbt";
-open(my $fh, "<", $file)||die "Cannot open $file: $!";
+open(my $fh, '<', $file)||die "Cannot open $file: $!";
 
 my @name = map /^name\s?:=\s?\"(.*)\"\s*$/i, <$fh>;
 seek $fh,0,0;
@@ -33,6 +33,11 @@ chomp $whereami;
 my $jarFile = $whereami . "/target/scala-" . $scalaVersion . "/" . $AppName . "-assembly-" . $version . ".jar";
 if (-e $jarFile) {
 	print "Found executable jar @ " . $jarFile . "\n";
+	my @cmds = ("#!" . $ARGV[0] ."\n","\`" . $ARGV[1] . " -jar " . $jarFile . " \@ARGV " . "org.blackquill.main\`\n");
+	my $commandFile = "./BlackQuill";
+	open my $cmd , '>', $commandFile||die "command file cannot be generated.";
+	print $cmd @cmds;
+	close $cmd;
 }else{
-	print "executable jar file not found.";
+	print "executable jar file not found." . "\n";
 }
