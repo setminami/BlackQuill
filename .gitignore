@@ -5,7 +5,8 @@ project/target/config-classes
 .ensime
 .ensime_session
 .ensime_lucene
-*.sublime*
+BlackQuill.sublime-project
+BlackQuill.sublime-workspace
 .history
 .project
 .classpath
