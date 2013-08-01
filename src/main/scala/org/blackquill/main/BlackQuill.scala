@@ -127,7 +127,7 @@ object BlackQuill{
 
   def blackquill(lines:List[String]):List[String] = {
     val str = new HTMLMap htmlTAGFilter lines.mkString("""\,""")
-    log info str
+    log debug str
     val parsed = new BQParser
     val HTML = parsed.toHTML(str)
     if(Switches.getStdout){

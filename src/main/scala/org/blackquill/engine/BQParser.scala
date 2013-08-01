@@ -174,7 +174,7 @@ class BQParser {
 			val sizeCheck = if(nRange._1 != -1){nRange._1 + m.get.group("hSize").size}else{0}
 			val headSize = if(sizeCheck != 0 && sizeCheck - 1 < nRange._2){sizeCheck - 1}else{
 				log error "Auto Numbering header FATAL Error. % anotation overflowed. Check nrange value and % sequences again. You can use sequence % - " + "%" * (nRange._2 - nRange._1)
-				log info nRange
+				log debug nRange
 				exit(-1)
 			}
 
@@ -273,7 +273,7 @@ class BQParser {
 
 				val fSize = if(Option(m.get.group("size")) != None){
 				  try{
-					  log info m.get.group("size")
+					  log debug m.get.group("size")
 					  " font-size:" + fontSize(m.get.group("size").toInt) + ";"
 				  }catch{ case e:Exception => log info e;" font-size:" + fontSize(0) + ";"}
 				}else{""}
@@ -301,7 +301,7 @@ class BQParser {
 	}
 
 	private def generateTOC(doc:String, regex:String, TAG:String):String = {
-	  	log info doc
+	  	log debug doc
 
 		def _checkRange(start:Option[String],end:Option[String],default:Tuple2[Int,Int]):Tuple2[Int,Int] = {
 			val s = if(start != None && start.get.toInt >= default._1){start.get.toInt}else{default._1}
@@ -382,7 +382,7 @@ class BQParser {
 	private def makeHeaderMap(doc:String,minH:Integer,maxH:Integer):List[Tuple4[Integer,Integer,Option[String],String]] = {
 		var headList = List[Tuple4[Integer,Integer,Option[String],String]]()
 	  	for((line,no) <- doc.split("""\\,""").zipWithIndex){
-	  		log info "line=" + line +" No=" + no
+	  		log debug "line=" + line +" No=" + no
 			val p = """.*?(<h(\d)(.*?)\s*?>(.*?)</h\d>).*""".r
 			val m = p.findAllMatchIn(line)
 
@@ -397,12 +397,12 @@ class BQParser {
 				}
 			}
 		}
-		log info headList
+		log debug headList
 		headList.reverse
 	}
 
 	private def wordDefinition(doc:String, regex:String, TAG:String):String = {
-	    log info "***" + doc
+	    log debug "***" + doc
 		if(doc == ""){return ""}
 		val p = new Regex(regex,"before","seq","word","defSeq","def","following")
 		val m = p.findFirstMatchIn(doc)
@@ -411,7 +411,7 @@ class BQParser {
 			val bef = m.get.group("before")
 			val fol = m.get.group("following")
 			val p2 = """(((?:\\,)?.*?\\,)(:.+?\\,)+)+?""".r
-			log info "seq ->" + m.get.group("seq")
+			log debug "seq ->" + m.get.group("seq")
 
 			val m2 = p2.findAllMatchIn(m.get.group("seq"))
 
@@ -1181,7 +1181,7 @@ class BQParser {
 
 	private def surroundByGeneralTAG(doc:String, regex:String, TAG:String):String = {
 	  if(doc == ""||Option(doc) == None){return ""}
-	  log info doc
+	  log debug doc
 	  val p = new Regex(regex,"before","inTAG","following")
 	  val m = p findFirstMatchIn(doc)
 	  if(m != None){
