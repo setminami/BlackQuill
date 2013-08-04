@@ -12,6 +12,7 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.Set
 import scala.collection.mutable.Stack
 import scala.collection.mutable.ListMap
+import scala.collection.mutable.ListBuffer
 import scala.collection.SortedSet
 import scala.util.matching.Regex
 import scala.util.control.Breaks.{break,breakable}
@@ -44,11 +45,13 @@ class BQParser {
 
 	private val Syntax = LinkedHashMap(
 	//Early
-	"""^(.*?)(%{1,6})\x20(.*?)(\\,.*?)$$""" -> ("h", autoNumberingHeader _),
+	"""^(.*\\,)\|\-:b\s*=\s*(\d+?)\s+(\w+?)\s+(#?[\w\d]+?)\s+(?:w\s*=\s*(\d+?|auto)\s)?(?:h\s*=\s*(\d+?|auto)\s)?(?:bg\s*=\s*(#?[\w\d]+?)\s)?(?:lh\s*=\s*(\d+?(?:px|em|%))\s)?(?:mg\s*=\s*(\d+?)\s)?(?:al\s*=\s*(center|left|right|justify)\s)?(?:rad\s*=\s*(\d+?))?\-+?\|\\,(.*?)$$"""
+	-> ("div",fencedBox _),
+	"""^(.*)\|\-:\{(.*?)\}\|(.*?)""" -> ("div",fencedBoxByClass _),
 	s"""^(.*?)$texSignStart(.*?)$texSignEnd(.*?)$$""" -> ("", laTeXConvert _),
 	"""^(.*?)(([^(?:\\,)]+?\\,(:(.+?)\\,)+)+)(.*?)$$""" -> ("dl", wordDefinition _),
 	"""(.*)\\,~{3,}(?:\{(.+?)\})?(\\,.+\\,)~{3,}\\,(.*)""" -> ("code", fencedCode _),
-	"""^(.*?)(?:\[(.+?)\](?:\{(.+?)\})?\\,)?((\|.+?)+?\|)\\,((\|:?\-{3,}:?)+?\|)\\,(((\|.+?\|?)+?\\,)+?)\\,(.*?)$$"""
+	"""^(.*?)(?:\[(.+?)\](?:\{(.+?)\})?\\,)?((\|[^-]+?)+?\|)\\,((\|:?\-{3,}:?)+?\|)\\,(((\|.+?\|?)+?\\,)+?)\\,(.*?)$$"""
 	-> ("table",surroundTableTAG _),
 	"^(.*?)`(.*)" -> ("code",surroundByCodeTAG _),
 	"^(.*)<([\\w\\d\\.\\-\\_\\+]+?)@([\\w\\d\\.\\-\\_\\+]+?)>(.*)" -> ("a", autoMailLink _),
@@ -61,7 +64,6 @@ class BQParser {
 	"^(.*?)!\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?(?:\\x20+?(\\d+?%?)?x(\\d+?%?)?)?\\)(?:\\{(.+?)\\})?(.*)$$"
 	-> ("img", putImgTAG _),
 	"^(.*?)\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?\\)(?:\\{(.+?)\\})?(.*?)$$" -> ("a", surroundaHrefTAG _),
-	"^(.*?\\\\,)(((?:\\x20{4,}|\\t+)(.*?\\\\,))+)(.*?)$$" -> ("code",surroundByPreCodeTAG _),
 	"^(.*?\\\\,)((>.*(?:\\\\,))+?)(.*?)$$" -> ("blockquote",surroundByBlockquoteTAG _),
 	"^(.*?)(((?:\\x20{4,}|\\t+)\\d+?\\.\\x20.+?\\\\,)+)(.*?)$$" -> ("ol",surroundByListTAG _),
 	"^(.*?)(((?:\\x20{4,}|\\t+)(?:\\*|\\+|\\-)\\x20.+?\\\\,)+)(.*?)$$" -> ("ul",surroundByListTAG _),
@@ -69,10 +71,10 @@ class BQParser {
 	"^(.*\\\\,)(.*?)(?:\\{(.+?)\\})?\\\\,(\\-+|=+)\\x20*\\\\,(.*?)$$" -> ("h",surroundByHeadTAGUnderlineStyle _),
 	"""^(.*?)(\{toc(:.+?)?\})(.*)$$""" -> ("ul",generateTOC _),
 	"^(.*\\\\,)((?:\\-|\\*){3,}|(?:(?:\\-|\\*)\\x20){3,})(.*?)$$" -> ("hr",putHrTAG _),
-	"^(.*?)\\*\\*(.+?)\\*\\*(.*?)$$" -> ("strong",surroundByGeneralTAG _),
-	"^(.*?)\\*(.+?)\\*(.*?)$$" -> ("em",surroundByGeneralTAG _),
-	"""^(.*)\|\-:b\s*=\s*(\d+?)\s*(\w*?)\s*(#?[\w\d]+?)\sw\s*=\s*(\d+?)\srad\s*=\s*(\d+?)\-+?\|(.*?)$$""" -> ("div",fencedBox _),
-	"""^(.*)\|\-:\{(.*?)\}\|(.*?)""" -> ("div",fencedBoxByClass _)
+	"^(.*?)\\*\\*([^\\,]{1,64}?)\\*\\*(.*?)$$" -> ("strong",surroundByGeneralTAG _),
+	"^(.*?)\\*([^\\,]{1,64}?)\\*(.*?)$$" -> ("em",surroundByGeneralTAG _),
+	"""^(.*?\\,)(%{1,6})\x20(.*?)(\\,.*?)$$""" -> ("h", autoNumberingHeader _),
+	"^(.*?\\\\,)(((?:\\x20{4,}|\\t+)(.*?\\\\,))+)(.*?)$$" -> ("code",surroundByPreCodeTAG _)
 	//late
 	)
 
@@ -116,35 +118,51 @@ class BQParser {
 
 	private def fencedBox(doc:String, regex:String, TAG:String):String = {
 
-		val p = new Regex(regex,"before","border","style","color","width","rad","following")
+		val p = new Regex(regex,"before","border","style","color","width","height","background","line-h","margine","align","rad","following")
 		val m = p findFirstMatchIn(doc)
 
 		if(m != None){
 			val bef = m.get.group("before")
 			val fol = m.get.group("following")
 
-			val borderW = if(m.get.group("border") != None){
+			val borderW = if(Option(m.get.group("border")) != None){
 				m.get.group("border") + "px "
 			}else{"1"}
-			val borderStyle = if(m.get.group("style") != None){
+			val borderStyle = if(Option(m.get.group("style")) != None){
 				m.get.group("style")
 			}else{"solid"}
-			val borderColor = if(m.get.group("color") != None){
+			val borderColor = if(Option(m.get.group("color")) != None){
 				" " + m.get.group("color")
 			}else{"black"}
-			val boxW = if(m.get.group("width") != None){
-				m.get.group("width") + "px"
-			}else{
-				log error "FENCED BOX WIDTH is not set."
-				exit(-1)
-			}
-			val boxRad = if(m.get.group("rad") != None){
+			val boxW = if(Option(m.get.group("width")) != None){
+				val w = m.get.group("width")
+				if(w != "auto"){ w + "px"}
+				else{w}
+			}else{"auto"}
+			val boxH = if(Option(m.get.group("height")) != None){
+				val h = m.get.group("height")
+				if(h != "auto"){ h + "px"}
+				else{h}
+			}else{"auto"}
+			val bgColor = if(Option(m.get.group("background")) != None){
+				m.get.group("background")
+			}else{"white"}
+			val line_height = if(Option(m.get.group("line-h")) != None){
+				m.get.group("line-h")
+			}else{"normal"}
+			val margine = if(Option(m.get.group("margine")) != None){
+				m.get.group("margine") + "px"
+			}else{"auto"}
+			val align = if(Option(m.get.group("align")) != None){
+				m.get.group("align")
+			}else{"justify"}
+			val boxRad = if(Option(m.get.group("rad")) != None){
 				m.get.group("rad") + "px"
 			}else{"10px"}
 
 			val div =
 			s"""<$TAG style="border:$borderW$borderStyle$borderColor; width:$boxW;""" +
-			s"""border-radius:$boxRad;"> """
+			s"""height:$boxH; background-color:$bgColor; line-height:$line_height; margine:$margine; text-align:$align; border-radius:$boxRad;"> """
 
 			return fencedBox(bef,regex,TAG) + div + _searchEndMark(fol,regex,TAG)
 		}
@@ -347,7 +365,7 @@ class BQParser {
 			    toc += """</ul>\\,""" * ulNest
 			    ulNest = 0
 			  }
-			  toc += s"""<li><a href="#${h._3}" ><h${h._2}>${h._4}</h${h._2}></a></li>\\,"""
+			  toc += s"""<li><a href="#${h._3}" >${h._4}</a></li>\\,"""
 			  i = h._2
 			}
 
@@ -368,7 +386,7 @@ class BQParser {
 		    log debug "###" + e
 		    if(m != None){
 		    	val header = m.get.group(1).toInt
-		    	if( header >= min && header <= max){
+		    	if( header >= nRange._1 && header <= nRange._2){
 		    		val id = for(h<-headerMap if h._1 == i)yield{h._3}
 		    		text += s"""<h${header} id="${id.head}">${m.get.group(2)}</h$header>\\,"""
 		    	}else{
@@ -489,6 +507,7 @@ class BQParser {
 	}
 
 	private def fencedCode(doc:String, regex:String, TAG:String):String = {
+	    if(doc == ""){return ""}
 		val p = new Regex(regex, "before",  "SAttr", "inTAG", "following")
 		val m = p.findFirstMatchIn(doc)
 
@@ -505,7 +524,7 @@ class BQParser {
 			return fencedCode(bef,regex,"code") +
 				s"<pre $specialAttr><$TAG>\\\\," + ltgtExpand(inCode) + s"</$TAG></pre>" +
 					fencedCode(fol,regex,TAG)
-		}
+		}else{return doc}
 		doc
 	}
 
@@ -728,7 +747,7 @@ class BQParser {
 		    					_surroundByCodeTAG(follow.drop(0), regex, "`", TAG)
 	    			  	}else{
 							log warn s"$sign CodeBlock is wrong."
-			    			return ""
+			    			return fol
 			    		}
 	    			}
 	    		}else{return doc}
@@ -907,6 +926,13 @@ class BQParser {
 		val m = p findFirstMatchIn(doc)
 		log debug "[" + doc + "]"
 
+		val p2 = """(.*)<pre><code>(.+)</code></pre>(.*)""".r
+		val m2 = p2 findFirstMatchIn(doc)
+		if(m2 != None){
+			return surroundByPreCodeTAG(m2.get.group(1), regex, TAG) +
+			"""\\,<pre><code>\\,""" + m2.get.group(2) + """\\,</code></pre>\\,""" +
+			surroundByPreCodeTAG(m2.get.group(3), regex, TAG)
+		}else{return doc}
 		var bef = ""
 		var fol = ""
 		var contentStr = ""
@@ -918,10 +944,10 @@ class BQParser {
 
 		  log debug "^^^" + m.get.group("seq")
 		  val mat = """((?:\x20{4,}|\t+)(.*?\\,))+?""".r.findAllMatchIn(m.get.group("seq"))
-		  for(elem <- mat){
-		    contentStr += elem.group(2)
-		    log debug "***" + contentStr
-		  }
+		  	for(elem <- mat){
+		  		contentStr += elem.group(2)
+		  		log debug "***" + contentStr
+		  	}
 
 		  log debug contentStr
 		  return surroundByPreCodeTAG(bef,regex,TAG) +
@@ -1220,11 +1246,12 @@ class BQParser {
 	  	val bodyTAG = "body"
 	  	val htmlTAG = "html"
 	  	var md = preProcessors(markdown + "\\,")
-
+	  	val l = md.length()
 		for(k <- Syntax keys){
 		 md = Syntax(k)._2(md, k, Syntax(k)._1)
+		 log debug  Syntax(k)._1 + "***" + md
 		}
-
+	  	//log info md
 		md = backslashEscape(md)
 		md = paragraphize(md)
 	  	log debug urlDefMap
@@ -1245,44 +1272,47 @@ class BQParser {
 
 
 	private def paragraphize(doc:String):String = {
-		val delimiter = """\,"""
-		def f(text:String):String = {
-			text + delimiter
-		}
-		val BlockElements = new HTMLMap().BLOCKTags
-		var isBlock = 0
-		var isOneLineBlock = false
-		var text = ""
-		var pg = ""
+		if(doc == ""){return ""}
+		var text = ListBuffer.empty[String]
+		val textList = doc.split("""\\,""")
 
-		for(l <- doc.split("\\" + delimiter)){
-			isOneLineBlock = false
-			log debug l
-			breakable{
-				for(e <- BlockElements){
-				  log debug e
-					if(l.contains("<" + e) &&  l.contains("</" + e + ">")){
-						isOneLineBlock = true;break;
-					}else if(l.contains("<" + e)){
-						isBlock += 1;break;
-					}else if(l.contains("</" + e + ">")){
-						isBlock -= 1;isOneLineBlock = true;break;
-					}
+		val BlockElem = new HTMLMap BLOCKTags
+		var tag = ""
+		val blockElements = Stack.empty[String]
+		var blockDepth = 0
+
+		for(l <- textList){
+			if( blockElements.size > 0 ){
+				val pb = s"""</${blockElements.top}>""".r
+				val mb = pb findFirstMatchIn(l)
+
+				if(l != ""){text += l}
+				if(mb != None){
+					blockElements.pop
 				}
-			}
-			log debug ">>>>" + l + "::" + isBlock + "|" + isOneLineBlock
-			if(isBlock > 0 | isOneLineBlock){
-				text += l + delimiter
 			}else{
-				if(l != "" && isBlock <= 0){
-					text += "<p>" + l + "</p>" + delimiter
+				val p = """<([\w\d]+).*?>""".r
+				val m = p findFirstMatchIn(l)
+
+				if(m != None){
+					tag = m.get.group(1)
+					if(BlockElem contains(tag)){
+					  val pe = s"""</$tag>""".r
+					  val me = pe findFirstMatchIn(l)
+					  if(me == None){
+						 blockElements.push(tag)
+					  }
+					  if(l != ""){text += l}
+					}else{
+					  if(l != ""){text += "<p>" + l + "</p>"}
+					}
+				}else{
+				  if(l != ""){text += "<p>" + l + "</p>"}
 				}
-				isBlock = 0
 			}
 		}
-		text
-		//var text = "<p>" + doc.replaceAll("\\\\,\\\\,","</p>\\\\,\\\\,<p>") + "</p>"
-		//text.replaceAll("<p></p>","")
+	  text mkString("""\,""")
+
 	}
 
 	private def backslashEscape(doc:String):String = {

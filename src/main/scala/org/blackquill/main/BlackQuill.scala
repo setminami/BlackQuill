@@ -121,15 +121,16 @@ object BlackQuill{
     val output = blackquill(text)
     Switches.outputFile = sufRegex.replaceAllIn(Switches.getInputfile,".html")
     val out = new PrintWriter(Switches.dirName + Switches.outputFile)
+    //log info output
     output.foreach(out.print(_))
     out.close
   }
 
   def blackquill(lines:List[String]):List[String] = {
     val str = new HTMLMap htmlTAGFilter lines.mkString("""\,""")
-    log debug str
-    val parsed = new BQParser
-    val HTML = parsed.toHTML(str)
+    log info str
+    val HTML = new BQParser toHTML(str)
+    log info HTML
     if(Switches.getStdout){
       println(HTML)
     }
