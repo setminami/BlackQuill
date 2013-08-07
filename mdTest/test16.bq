@@ -1,4 +1,10 @@
+<link href="../css/markdown.css" type="text/css" rel="stylesheet"/>
 {toc:h2-h6}
+
+# コーディングを支える技術
+西尾泰和
+$date
+
 {nrange:h2-h6}
 
 aaa

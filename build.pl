@@ -38,6 +38,8 @@ if (-e $jarFile) {
 	open my $cmd , '>', $commandFile||die "command file cannot be generated.";
 	print $cmd @cmds;
 	close $cmd;
+	my $result = chmod 0755 ,$commandFile;
+	if($result != 1){die "Cannot change permission."}
 }else{
 	print "executable jar file not found." . "\n";
 }

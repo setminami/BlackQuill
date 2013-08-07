@@ -92,7 +92,8 @@ object BlackQuill{
 
   def main(args:Array[String]){
     val sufRegex = """(\.md$)|(\.markdown$)|(\.txt$)|(\.bq$)|(\.blackquill$)""".r
-
+    val start = System.currentTimeMillis()
+    
     try{
       val it = args.iterator
       for(elem <- it){
@@ -117,20 +118,26 @@ object BlackQuill{
     }catch{ case e:Exception => log.warn("wrong switch is found see --help or Website\n" + wiki)}
     val fileHandler = FileIO
     // - fileHandler.openMarkdownFromString(str:String)
+    log info "prepared " + (System.currentTimeMillis() - start) + " msec"
     val text:List[String] = fileHandler openMarkdownFromFile(Switches.getInputfile)
-    val output = blackquill(text)
+    val output = blackquill(new HTMLMap().specialCharConvert(text))
+    log info "generate HTML " + (System.currentTimeMillis() - start) + " msec"
     Switches.outputFile = sufRegex.replaceAllIn(Switches.getInputfile,".html")
     val out = new PrintWriter(Switches.dirName + Switches.outputFile)
     //log info output
     output.foreach(out.print(_))
     out.close
+    log info (System.currentTimeMillis() - start) + " msec"
   }
 
   def blackquill(lines:List[String]):List[String] = {
+    val start = System.currentTimeMillis()
     val str = new HTMLMap htmlTAGFilter lines.mkString("""\,""")
-    log info str
+    log info "TAGFiltered " + (System.currentTimeMillis() - start) + " msec"
+    log debug str
     val HTML = new BQParser toHTML(str)
-    log info HTML
+    log info "toHTML " + (System.currentTimeMillis() - start) + " msec"
+    log debug HTML
     if(Switches.getStdout){
       println(HTML)
     }

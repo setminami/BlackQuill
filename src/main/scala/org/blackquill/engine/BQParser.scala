@@ -29,6 +29,11 @@ import org.blackquill.main._
 import org.blackquill.io.FileIO
 import org.blackquill.breadboard.Latexconverter
 
+//import scala.actors.Actor._
+// import scala.concurrent._
+// import scala.concurrent.duration._
+// import ExecutionContext.Implicits.global
+// import scala.util.{Failure, Success}
 
 class BQParser {
 	private val log:Log = LogFactory.getLog(classOf[BQParser])
@@ -43,44 +48,45 @@ class BQParser {
 	private val texSignStart = """\\begin\{TeX\}"""
 	private val texSignEnd = """\\end\{TeX\}"""
 
-	private val Syntax = LinkedHashMap(
+
+	val Syntax = LinkedHashMap[Regex,(String,(String,Regex,String)=>String)](
 	//Early
-	"""^(.*\\,)\|\-:b\s*=\s*(\d+?)\s+(\w+?)\s+(#?[\w\d]+?)\s+(?:w\s*=\s*(\d+?|auto)\s)?(?:h\s*=\s*(\d+?|auto)\s)?(?:bg\s*=\s*(#?[\w\d]+?)\s)?(?:lh\s*=\s*(\d+?(?:px|em|%))\s)?(?:mg\s*=\s*(\d+?)\s)?(?:al\s*=\s*(center|left|right|justify)\s)?(?:rad\s*=\s*(\d+?))?\-+?\|\\,(.*?)$$"""
+	"""^(.*\\,)\|\-:b\s*=\s*(\d+?)\s+(\w+?)\s+(#?[\w\d]+?)\s+(?:w\s*=\s*(\d+?|auto)\s)?(?:h\s*=\s*(\d+?|auto)\s)?(?:bg\s*=\s*(#?[\w\d]+?)\s)?(?:lh\s*=\s*(\d+?(?:px|em|%))\s)?(?:mg\s*=\s*(\d+?)\s)?(?:al\s*=\s*(center|left|right|justify)\s)?(?:rad\s*=\s*(\d+?))?\-+?\|\\,(.*?)$$""".r("before","border","style","color","width","height","background","line-h","margine","align","rad","following")
 	-> ("div",fencedBox _),
-	"""^(.*)\|\-:\{(.*?)\}\|(.*?)""" -> ("div",fencedBoxByClass _),
-	s"""^(.*?)$texSignStart(.*?)$texSignEnd(.*?)$$""" -> ("", laTeXConvert _),
-	"""^(.*?)(([^(?:\\,)]+?\\,(:(.+?)\\,)+)+)(.*?)$$""" -> ("dl", wordDefinition _),
-	"""(.*)\\,~{3,}(?:\{(.+?)\})?(\\,.+\\,)~{3,}\\,(.*)""" -> ("code", fencedCode _),
-	"""^(.*?)(?:\[(.+?)\](?:\{(.+?)\})?\\,)?((\|[^-]+?)+?\|)\\,((\|:?\-{3,}:?)+?\|)\\,(((\|.+?\|?)+?\\,)+?)\\,(.*?)$$"""
+	"""^(.*)\|\-:\{(.*?)\}\|(.*?)""".r("before","class","following") -> ("div",fencedBoxByClass _),
+	s"""^(.*?)$texSignStart(.*?)$texSignEnd(.*?)$$""".r("before","tex","following") -> ("", laTeXConvert _),
+	"""^(.*?)(([^(?:\\,)]+?\\,(:(.+?)\\,)+)+)(.*?)$$""".r("before","seq","word","defSeq","def","following") -> ("dl", wordDefinition _),
+	"""^(.*?)\\,~{3,}(?:\{([\.\_\w\d\s]+?)\})?(\\,.+?\\,)~{3,}\\,(.*?)$$""".r("before","SAttr","inTAG", "following") -> ("code", fencedCode _),//SpeedUp
+	"""^(.*?)(?:\[(.+?)\](?:\{(.+?)\})?\\,)?((\|[^-]+?)+?\|)\\,((\|:?\-{3,}:?)+?\|)\\,(((\|.+?\|?)+?\\,)+?)\\,(.*?)$$""".r("before","caption","css","headSeq","head","separatorSeq","sep","bodySeq","body","b","following")
 	-> ("table",surroundTableTAG _),
-	"^(.*?)`(.*)" -> ("code",surroundByCodeTAG _),
-	"^(.*)<([\\w\\d\\.\\-\\_\\+]+?)@([\\w\\d\\.\\-\\_\\+]+?)>(.*)" -> ("a", autoMailLink _),
-	"^(.*)<((?:https?|ftp):\\/\\/[\\w\\d\\.\\/]+?)>(.*)$$" -> ("a",autoURLLink _),
-	"""^(.*)\[\^(.+?)\](.*)$$""" -> ("sup",insertFootnote _),
-	"""(.*)\*\[(.*?)\]\{(#?[\w\d]+?)?(/#?[\w\d]+?)?(\(\+?(.*?)?(\|\+?(.*?))?\))?(\[(.*?)\])?\}(.*)"""
-	-> ("span",colorPen _),
-	"^(.*)!\\[(.+?)\\]\\[(.*?)\\](?:\\{(.+?)\\})?(.*)$$" -> ("img",referenceExpander _),
-	"^(.*)\\[(.+?)\\]\\[(.*?)\\](?:\\{(.+?)\\})?(.*)$$" -> ("a",referenceExpander _),
-	"^(.*?)!\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?(?:\\x20+?(\\d+?%?)?x(\\d+?%?)?)?\\)(?:\\{(.+?)\\})?(.*)$$"
+	"^(.*?)`(.*)$$".r -> ("code",surroundByCodeTAG _),//SpeedUp
+	"^(.*)<([\\w\\d\\.\\-\\_\\+]+?)@([\\w\\d\\.\\-\\_\\+]+?)>(.*)".r("before","inTAG","domain","following") -> ("a", autoMailLink _),
+	"^(.*)<((?:https?|ftp):\\/\\/[\\w\\d\\.\\/]+?)>(.*)$$".r("before","inTAG","following") -> ("a",autoURLLink _),
+	"""^(.*)\[\^(.+?)\](.*)$$""".r("before","footnote","following") -> ("sup",insertFootnote _),
+	"""^(.*)\*\[(.*?)\]\{(#?[\w\d]+?)?(/#?[\w\d]+?)?(\(\+?(.*?)?(\|\+?(.*?))?\))?(\[(.*?)\])?\}(.*)$$""".r("before","content","fcolor","bcolor","fstyle","size","dummy","weight","face","ffamily","following")
+	-> ("span",colorPen _), //SpeedUp
+	"^(.*)!\\[(.+?)\\]\\[(.*?)\\](?:\\{(.+?)\\})?(.*)$$".r -> ("img",referenceExpander _),
+	"^(.*)\\[(.+?)\\]\\[(.*?)\\](?:\\{(.+?)\\})?(.*)$$".r -> ("a",referenceExpander _),
+	"^(.*?)!\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?(?:\\x20+?(\\d+?%?)?x(\\d+?%?)?)?\\)(?:\\{(.+?)\\})?(.*)$$".r("before","alt","url","title","resX","resY","css","following")
 	-> ("img", putImgTAG _),
-	"^(.*?)\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?\\)(?:\\{(.+?)\\})?(.*?)$$" -> ("a", surroundaHrefTAG _),
-	"^(.*?\\\\,)((>.*(?:\\\\,))+?)(.*?)$$" -> ("blockquote",surroundByBlockquoteTAG _),
-	"^(.*?)(((?:\\x20{4,}|\\t+)\\d+?\\.\\x20.+?\\\\,)+)(.*?)$$" -> ("ol",surroundByListTAG _),
-	"^(.*?)(((?:\\x20{4,}|\\t+)(?:\\*|\\+|\\-)\\x20.+?\\\\,)+)(.*?)$$" -> ("ul",surroundByListTAG _),
-	"^(.*?)(#{1,6})\\x20(.+?)(\\x20#{1,6}?(?:\\{(.*?)\\}))?\\\\,(.*?)$$" -> ("h",surroundByHeadTAG _),
-	"^(.*\\\\,)(.*?)(?:\\{(.+?)\\})?\\\\,(\\-+|=+)\\x20*\\\\,(.*?)$$" -> ("h",surroundByHeadTAGUnderlineStyle _),
-	"""^(.*?)(\{toc(:.+?)?\})(.*)$$""" -> ("ul",generateTOC _),
-	"^(.*\\\\,)((?:\\-|\\*){3,}|(?:(?:\\-|\\*)\\x20){3,})(.*?)$$" -> ("hr",putHrTAG _),
-	"^(.*?)\\*\\*([^\\,]{1,64}?)\\*\\*(.*?)$$" -> ("strong",surroundByGeneralTAG _),
-	"^(.*?)\\*([^\\,]{1,64}?)\\*(.*?)$$" -> ("em",surroundByGeneralTAG _),
-	"""^(.*?\\,)(%{1,6})\x20(.*?)(\\,.*?)$$""" -> ("h", autoNumberingHeader _),
-	"^(.*?\\\\,)(((?:\\x20{4,}|\\t+)(.*?\\\\,))+)(.*?)$$" -> ("code",surroundByPreCodeTAG _)
+	"^(.*?)\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?\\)(?:\\{(.+?)\\})?(.*?)$$".r("before","inTag","link","title","css","following") -> ("a", surroundaHrefTAG _),
+	"^(.*?\\\\,)((>\\s.*(?:\\\\,))+?)(.*?)$$".r("before","inTAG","midInTag","following") -> ("blockquote",surroundByBlockquoteTAG _),
+	"^(.*?)(((?:\\x20{4,}|\\t+)\\d+?\\.\\x20.+?\\\\,)+)(.*?)$$".r("before","elements","element","following") -> ("ol",surroundByListTAG _),
+	"^(.*?)(((?:\\x20{4,}|\\t+)(?:\\*|\\+|\\-)\\x20.+?\\\\,)+)(.*?)$$".r("before","elements","element","following") -> ("ul",surroundByListTAG _),
+	"^(.*?)(#{1,6})\\x20(.+?)(\\x20#{1,6}?(?:\\{(.*?)\\}))?\\\\,(.*?)$$".r("before","startHead","inTAG","endHead","id","following") -> ("h",surroundByHeadTAG _),
+	"""^(.*?\\,)(.*?)(?:\{(.+?)\})?\\,(\-+|=+)\s*\\,(.*?)$$""".r("before","inTAG","id","style","following") -> ("h",surroundByHeadTAGUnderlineStyle _),//Speedup
+	"""^(.*?)(\{toc(:.+?)?\})(.*)$$""".r("before","toc","range","following") -> ("ul",generateTOC _),
+	"^(.*\\\\,)((?:\\-|\\*){3,}|(?:(?:\\-|\\*)\\x20){3,})(.*?)$$".r("before","line","following") -> ("hr",putHrTAG _),
+	"^(.*?)\\*\\*([^\\,]{1,64}?)\\*\\*(.*?)$$".r("before","inTAG","following") -> ("strong",surroundByGeneralTAG _),
+	"^(.*?)\\*([^\\,]{1,64}?)\\*(.*?)$$".r("before","inTAG","following") -> ("em",surroundByGeneralTAG _),
+	"""^(.*?\\,)(%{1,6})\x20(.*?)(\\,.*?)$$""".r("before","hSize","inTAG","following") -> ("h", autoNumberingHeader _),
+	"""^(.*?\\,)(((?:\x20{4,}|\t+)(.*?\\,))+?)(.*?)$$""".r("before","seq","inTAG","midInTag","following") -> ("code",surroundByPreCodeTAG _)
 	//late
 	)
 
-	private def fencedBoxByClass(doc:String, regex:String, TAG:String):String = {
-		val p = new Regex(regex,"before","class","following")
-		val m = p findFirstMatchIn(doc)
+
+	def fencedBoxByClass(doc:String, regex:Regex, TAG:String):String = {
+		val m = regex findFirstMatchIn(doc)
 
 		if(m != None){
 			val bef = m.get.group("before")
@@ -91,18 +97,18 @@ class BQParser {
 				return fencedBoxByClass(bef,regex,TAG) + s"""<$TAG class="$claz"> """ + _searchEndMark(fol,regex,TAG)
 			}else{
 				log error s"Class Name:$claz Not found"
-				exit(1)
+				exit()
 			}
 		}
 		doc
 	}
 
-	private def _searchEndMark(doc:String,regex:String,TAG:String):String = {
+	def _searchEndMark(doc:String,regex:Regex,TAG:String):String = {
 		val p2 = """^(.*?)\|_{3,}\|(.*?)$$""".r
 		val m2 = p2 findFirstMatchIn(doc)
 
 		if(m2 != None){
-			val p3 = """(.*)\|\-:.*?\\,(.*)""".r
+			val p3 = """^(.*)\|\-:.*?\\,(.*)$$""".r
 			val m3 = p3 findFirstMatchIn(m2.get.group(1))
 			if(m3 != None){
 				return fencedBox(m2.get.group(2),regex,TAG)
@@ -116,10 +122,8 @@ class BQParser {
 		doc
 	}
 
-	private def fencedBox(doc:String, regex:String, TAG:String):String = {
-
-		val p = new Regex(regex,"before","border","style","color","width","height","background","line-h","margine","align","rad","following")
-		val m = p findFirstMatchIn(doc)
+	def fencedBox(doc:String, regex:Regex, TAG:String):String = {
+		val m = regex findFirstMatchIn(doc)
 
 		if(m != None){
 			val bef = m.get.group("before")
@@ -161,7 +165,7 @@ class BQParser {
 			}else{"10px"}
 
 			val div =
-			s"""<$TAG style="border:$borderW$borderStyle$borderColor; width:$boxW;""" +
+			s"""\\,<$TAG style="border:$borderW$borderStyle$borderColor; width:$boxW;""" +
 			s"""height:$boxH; background-color:$bgColor; line-height:$line_height; margine:$margine; text-align:$align; border-radius:$boxRad;"> """
 
 			return fencedBox(bef,regex,TAG) + div + _searchEndMark(fol,regex,TAG)
@@ -169,7 +173,7 @@ class BQParser {
 		doc
 	}
 
-	private def autoNumberingHeader(doc:String, regex:String, TAG:String):String = {
+	def autoNumberingHeader(doc:String, regex:Regex, TAG:String):String = {
 		def _popTheWastes(i:Int):Stack[Tuple3[Int,Int,String]] = {
 			if(nStack.top._1 > i){
 				nStack.pop
@@ -181,8 +185,7 @@ class BQParser {
 			return _popTheWastes(i)
 		}
 
-		val p = new Regex(regex,"before","hSize","inTAG","following")
-		val m = p findFirstMatchIn(doc)
+		val m = regex findFirstMatchIn(doc)
 
 		if(m != None){
 			val bef = m.get.group("before")
@@ -193,7 +196,7 @@ class BQParser {
 			val headSize = if(sizeCheck != 0 && sizeCheck - 1 < nRange._2){sizeCheck - 1}else{
 				log error "Auto Numbering header FATAL Error. % anotation overflowed. Check nrange value and % sequences again. You can use sequence % - " + "%" * (nRange._2 - nRange._1)
 				log debug nRange
-				exit(-1)
+				exit()
 			}
 
 			if(nStack.isEmpty){
@@ -201,7 +204,7 @@ class BQParser {
 					nStack.push(Tuple3[Int,Int,String](headSize,1,"." + inTAG))
 				}else{
 					log error "Auto numbering header Error. {nrange..} notation is not set, but found % anotation. You can use sequence % - " + "%" * (nRange._2 - nRange._1)
-					exit(-1)
+					exit()
 				}
 			}else if(nStack.top._1 < headSize){
 				nStack.push(Tuple3[Int,Int,String](headSize,1,"." + inTAG))
@@ -221,7 +224,7 @@ class BQParser {
 		doc
 	}
 
-	private def autoNumberSetting(doc:String):String = {
+	def autoNumberSetting(doc:String):String = {
 		val p = """^(.*)(\{nrange(:h?\d?\-h?\d?)?\})(.*)$$""".r
 		val m = p findFirstMatchIn(doc)
 		if(m != None){
@@ -247,10 +250,9 @@ class BQParser {
 		doc
 	}
 
-	private def laTeXConvert(doc:String, regex:String, TAG:String):String = {
+	def laTeXConvert(doc:String, regex:Regex, TAG:String):String = {
 		if(doc == ""){return ""}
-		val p = new Regex(regex, "before","tex","following")
-		val m = p findFirstMatchIn(doc)
+		val m = regex findFirstMatchIn(doc)
 
 		if(m != None){
 			val bef = m.get.group("before")
@@ -264,13 +266,12 @@ class BQParser {
 		doc
 	}
 
-	private def colorPen(doc:String, regex:String, TAG:String):String = {
-		lazy val fontSize = Map[Int,String](0 -> "medium", 1 -> "larger", 2 -> "large", 3 -> "x-large", 4 -> "xx-large",
+	def colorPen(doc:String, regex:Regex, TAG:String):String = {
+		val fontSize = Map[Int,String](0 -> "medium", 1 -> "larger", 2 -> "large", 3 -> "x-large", 4 -> "xx-large",
 														  -1 -> "smaller", -2 -> "small", -3 -> "x-small", -4 -> "xx-small")
-		lazy val fontWeight = Map(0 -> "normal", 1 -> "bolder", 2 -> "bold" ,-1 -> "light")
+		val fontWeight = Map(0 -> "normal", 1 -> "bolder", 2 -> "bold" ,-1 -> "light")
 		if(doc == ""){return ""}
-		val p = new Regex(regex, "before","content","fcolor","bcolor","fstyle","size","dummy","weight","face","ffamily","following")
-		val m = p findFirstMatchIn(doc)
+		val m = regex findFirstMatchIn(doc)
 
 		if(m != None){
 			val bef = m.get.group("before")
@@ -318,7 +319,7 @@ class BQParser {
 		doc
 	}
 
-	private def generateTOC(doc:String, regex:String, TAG:String):String = {
+	def generateTOC(doc:String, regex:Regex, TAG:String):String = {
 	  	log debug doc
 
 		def _checkRange(start:Option[String],end:Option[String],default:Tuple2[Int,Int]):Tuple2[Int,Int] = {
@@ -328,8 +329,7 @@ class BQParser {
 		}
 
 		val text = ""
-		val p = new Regex(regex, "before","toc","range","following")
-		val m = p findFirstMatchIn(doc)
+		val m = regex findFirstMatchIn(doc)
 		var minmax = (1,6)
 		if(m != None){
 			val bef = m.get.group("before")
@@ -376,7 +376,7 @@ class BQParser {
 
 		doc
 	}
-	private def putHeaderID(doc:String,min:Int,max:Int):String ={
+	def putHeaderID(doc:String,min:Int,max:Int):String ={
 		if(doc == ""){return ""}
 		var text = ""
 		for((e,i) <- doc.split("""\\,""").zipWithIndex){
@@ -397,7 +397,7 @@ class BQParser {
 		text
 	}
 
-	private def makeHeaderMap(doc:String,minH:Integer,maxH:Integer):List[Tuple4[Integer,Integer,Option[String],String]] = {
+	def makeHeaderMap(doc:String,minH:Integer,maxH:Integer):List[Tuple4[Integer,Integer,Option[String],String]] = {
 		var headList = List[Tuple4[Integer,Integer,Option[String],String]]()
 	  	for((line,no) <- doc.split("""\\,""").zipWithIndex){
 	  		log debug "line=" + line +" No=" + no
@@ -419,11 +419,10 @@ class BQParser {
 		headList.reverse
 	}
 
-	private def wordDefinition(doc:String, regex:String, TAG:String):String = {
+	def wordDefinition(doc:String, regex:Regex, TAG:String):String = {
 	    log debug "***" + doc
 		if(doc == ""){return ""}
-		val p = new Regex(regex,"before","seq","word","defSeq","def","following")
-		val m = p.findFirstMatchIn(doc)
+		val m = regex.findFirstMatchIn(doc)
 
 		if(m != None){
 			val bef = m.get.group("before")
@@ -454,18 +453,17 @@ class BQParser {
 		}
 		doc
 	}
-	private def insertFootnote(doc:String, regex:String, TAG:String):String = {
+	def insertFootnote(doc:String, regex:Regex, TAG:String):String = {
 		if(doc == ""){return ""}
 
-		val p = new Regex(regex,"before","footnote","following")
-		val m = p.findFirstMatchIn(doc)
+		val m = regex.findFirstMatchIn(doc)
 		if(m != None){
 			val bef = m.get.group("before")
 			var fnote = m.get.group("footnote")
 			val fol = m.get.group("following")
 			if(footnoteMap.contains(fnote)){
 				val link = footnoteMap(fnote)._1
-				lazy val definition = footnoteMap(fnote)._2
+				val definition = footnoteMap(fnote)._2
 
 				return insertFootnote(bef,regex,TAG) + s"""<$TAG id=\"$fnote\"><a href=\"#$link\" style="text-decoration:none">[$fnote]</a></sup>""" +
 					insertFootnote(fol,regex,TAG)
@@ -476,7 +474,7 @@ class BQParser {
 		doc
 	}
 
-	private def gatheringFootnotesDefinition(doc:String):String = {
+	def gatheringFootnotesDefinition(doc:String):String = {
 		val p = new Regex("""^(.*)\[\^(.*?)\]:(.*?)\\,(.*)$$""","before","landMark","definition","following")
 		val m = p findFirstMatchIn(doc)
 
@@ -496,20 +494,20 @@ class BQParser {
 		doc
 	}
 
-	private def insertFootnoteDefinitions(doc:LinkedHashMap[String,Tuple2[String,String]]):String = {
-		lazy val head = """<footer><nav>\,<h2 id="footnotes">Footnotes</h2><hr />\,<ul style="list-style:none">\,"""
+	def insertFootnoteDefinitions(doc:LinkedHashMap[String,Tuple2[String,String]]):String = {
+		val head = """<footer><nav>\,<h2 id="footnotes">Footnotes</h2><hr />\,<ul style="list-style:none">\,"""
 		val contents =
 			for((key,t2) <- doc.toList.reverse)yield(s"""<li id="${t2._1}"><p><em>$key: </em>${t2._2}<a href="#$key">&laquo;</a></p>""")
-		lazy val tail = "</ul></nav></footer>"
+		val tail = "</ul></nav></footer>"
 		if(contents.size > 0){
 			return head + contents.mkString("\\,") + tail
 		}else{""}
 	}
 
-	private def fencedCode(doc:String, regex:String, TAG:String):String = {
+	def fencedCode(doc:String, regex:Regex, TAG:String):String = {
+	  val start = System.currentTimeMillis()
 	    if(doc == ""){return ""}
-		val p = new Regex(regex, "before",  "SAttr", "inTAG", "following")
-		val m = p.findFirstMatchIn(doc)
+		val m = regex.findFirstMatchIn(doc)
 
 		if(m != None){
 			val bef = m.get.group("before")
@@ -520,15 +518,15 @@ class BQParser {
 			if(Option(m.get.group("SAttr")) != None){
 				specialAttr = decideClassOrStyle(doc,m.get.group("SAttr"))
 			}
-
+			log debug (System.currentTimeMillis() - start).toString + " msec"
 			return fencedCode(bef,regex,"code") +
 				s"<pre $specialAttr><$TAG>\\\\," + ltgtExpand(inCode) + s"</$TAG></pre>" +
 					fencedCode(fol,regex,TAG)
 		}else{return doc}
-		doc
+
 	}
 
-	private def surroundTableTAG(doc:String, regex:String, TAG:String):String = {
+	def surroundTableTAG(doc:String, regex:Regex, TAG:String):String = {
 	  	def _normalize(text:String):String = {
 	  	  var retStr = text
 	  	  if(retStr.startsWith("|")){
@@ -547,8 +545,7 @@ class BQParser {
 		if(doc == ""){return ""}
 
 		log debug "***" + doc
-		val p = new Regex(regex, "before","caption","css","headSeq","head","separatorSeq","sep","bodySeq","body","b","following")
-		val m = p findFirstMatchIn(doc)
+		val m = regex findFirstMatchIn(doc)
 
 		if(m != None){
 			val bef = m.get.group("before")
@@ -590,7 +587,7 @@ class BQParser {
 				val headList = heads.toList
 				if(headList.size != alignList.size){
 					log error "Table header is wrong.:" + headList
-					exit(-1)
+					exit()
 				}
 
 
@@ -627,11 +624,9 @@ class BQParser {
 		doc
 	}
 
-	private def autoMailLink(doc:String, regex:String, TAG:String):String = {
+	def autoMailLink(doc:String, regex:Regex, TAG:String):String = {
 		if(doc == ""){return ""}
-
-		val p = new Regex(regex, "before","inTAG","domain","following")
-		val m = p findFirstMatchIn(doc)
+		val m = regex findFirstMatchIn(doc)
 
 		if(m!= None){
 			val bef = m.get.group("before")
@@ -645,11 +640,10 @@ class BQParser {
 		}
 		doc
 	}
-	private def autoURLLink(doc:String, regex:String, TAG:String):String = {
+	def autoURLLink(doc:String, regex:Regex, TAG:String):String = {
 		if(doc == ""){return ""}
 
-		val p = new Regex(regex, "before","inTAG","following")
-		val m = p findFirstMatchIn(doc)
+		val m = regex findFirstMatchIn(doc)
 
 		if(m!= None){
 			val bef = m.get.group("before")
@@ -661,11 +655,10 @@ class BQParser {
 		}
 		doc
 	}
-	private def putImgTAG(doc:String, regex:String, TAG:String):String = {
+	def putImgTAG(doc:String, regex:Regex, TAG:String):String = {
 		if(doc == ""){return ""}
 
-		val p = new Regex(regex,"before","alt","url","title","resX","resY","css","following")
-		val m = p findFirstMatchIn(doc)
+		val m = regex findFirstMatchIn(doc)
 
 		if(m != None){
 			val bef = m.get.group("before")
@@ -679,22 +672,22 @@ class BQParser {
 		doc
 	}
 
-	private def getResolutionX(resX:String):String = Option(resX) match{
+	def getResolutionX(resX:String):String = Option(resX) match{
 		case None => return ""
 		case Some(x) => return s" width=$resX "
 		case _ =>
 			log error "unknown parameter has found." + resX
-			exit(-1)
+			exit()
 	}
 
-	private def getResolutionY(resY:String):String = Option(resY) match{
+	def getResolutionY(resY:String):String = Option(resY) match{
 		case None => return ""
 		case Some(y) => return s" height=$resY "
 		case _ =>
 			log error "unknown parameter has found." + resY
-			exit(-1)
+			exit()
 	}
-	private def searchCSSClassName(doc:String,cssClass:String):Boolean = {
+	def searchCSSClassName(doc:String,cssClass:String):Boolean = {
 		val p = """(?i)<link.*?type=\"text\/css\".*?href=\"(.*?)\".*?>""".r
 		val m = p findFirstMatchIn(doc)
 
@@ -711,11 +704,10 @@ class BQParser {
 		false
 	}
 
-	private def surroundByCodeTAG(doc:String, regex:String, TAG:String):String = {
-	    def _surroundByCodeTAG(doc:String,regex:String,innerSign:String,TAG:String):String = {
+	def surroundByCodeTAG(doc:String, regex:Regex, TAG:String):String = {
+	    def _surroundByCodeTAG(doc:String,regex:Regex,innerSign:String,TAG:String):String = {
 	    	if(doc.contains(innerSign)){
-	    		val p = regex.r
-	    		val m = p.findFirstMatchIn(doc)
+	    		val m = regex.findFirstMatchIn(doc)
 
 	    		if(m != None){
 	    			val bef = m.get.group(1)
@@ -729,13 +721,13 @@ class BQParser {
 	    			}else{
 	    				follow = fol
 	    			}
-	    			log debug "**>" + follow
-	    			log debug "==>" + sign
-	    			val p2 = s"""^([^(?:\\,)]+?)$sign(.*)$$""".r
+	    			log debug "**> " + follow
+	    			log debug "==> " + sign
+	    			val p2 = s"""^(.+?)$sign(.*)$$""".r
 	    			val m2 = p2.findFirstMatchIn(follow)
 
 	    			if(m2 != None){
-	    				log debug ">>>>" + m2.get.group(1)
+	    				log debug ">>>> " + m2.get.group(1)
 	    				return _surroundByCodeTAG(bef, regex, "`", TAG) + s"<$TAG>" + ltgtExpand(m2.get.group(1)) + s"</$TAG>" +
 	    					_surroundByCodeTAG(m2.get.group(2), regex, "`", TAG)
 	    			}else{
@@ -756,8 +748,8 @@ class BQParser {
     _surroundByCodeTAG(doc,regex,"`",TAG)
 	}
 
-	private def referenceExpander(doc:String, regex:String, TAG:String):String = {
-		val m = regex.r.findFirstMatchIn(doc)
+	def referenceExpander(doc:String, regex:Regex, TAG:String):String = {
+		val m = regex.findFirstMatchIn(doc)
 		def expandAttribute(value:String):String = value match{
 			case "" => return ""
 			case _ => return value
@@ -790,7 +782,7 @@ class BQParser {
 						referenceExpander(m.get.group(5), regex, TAG)
 					case _ =>
 						log error "Unknown Expand TAG from Reference"
-						exit(-1)
+						exit()
 				}
 			}else{
 			  log warn "Link definition was not found : " + key
@@ -802,7 +794,7 @@ class BQParser {
 
 	}
 
-	private def urlDefinitions(doc:String):String = {
+	def urlDefinitions(doc:String):String = {
 		def _urlDefinitions(text:String):String = {
 		    var bef = ""
  		    var fol = ""
@@ -854,7 +846,7 @@ class BQParser {
 		_urlDefinitions(doc)
 	}
 
-	private def decideClassOrStyle(doc:String,className:String):String = {
+	def decideClassOrStyle(doc:String,className:String):String = {
 		if(className == "" || className == null){
 			return ""
 		}
@@ -872,7 +864,7 @@ class BQParser {
 		}
 	}
 
-	private def getTitleName(title:String):String = {
+	def getTitleName(title:String):String = {
 		if(title == ""| title == null){
 			return ""
 		}
@@ -880,9 +872,8 @@ class BQParser {
 		return s"""title=\"$title\" """
 	}
 
-	private def surroundaHrefTAG(doc:String,regex:String,TAG:String):String = {
-		val p = new Regex(regex,"before","inTag","link","title","css","following")
-		val m = p findFirstMatchIn(doc)
+	def surroundaHrefTAG(doc:String,regex:Regex,TAG:String):String = {
+		val m = regex findFirstMatchIn(doc)
 
 		var bef = ""
 		var fol = ""
@@ -902,9 +893,8 @@ class BQParser {
 		doc
 	}
 
-	private def putHrTAG(doc:String, regex:String, TAG:String):String = {
-	  	val p = new Regex(regex,"before","line","following")
-	  	val m = p findFirstMatchIn(doc)
+	def putHrTAG(doc:String, regex:Regex, TAG:String):String = {
+	  	val m = regex findFirstMatchIn(doc)
 
 	  	log debug doc
 
@@ -921,12 +911,11 @@ class BQParser {
 	  doc
 	}
 
-	private def surroundByPreCodeTAG(doc:String, regex:String, TAG:String):String = {
-		val p = new Regex(regex, "before","seq","inTAG","midInTag","following")
-		val m = p findFirstMatchIn(doc)
+	def surroundByPreCodeTAG(doc:String, regex:Regex, TAG:String):String = {
+		val m = regex findFirstMatchIn(doc)
 		log debug "[" + doc + "]"
 
-		val p2 = """(.*)<pre><code>(.+)</code></pre>(.*)""".r
+		val p2 = """^(.*)<pre><code>(.+?)</code></pre>(.*)$$""".r
 		val m2 = p2 findFirstMatchIn(doc)
 		if(m2 != None){
 			return surroundByPreCodeTAG(m2.get.group(1), regex, TAG) +
@@ -960,13 +949,12 @@ class BQParser {
 	  doc
 	}
 
-	private def ltgtExpand(doc:String):String = {
+	def ltgtExpand(doc:String):String = {
 		return doc.replaceAll("&","&amp").replaceAll("<","&gt;").replaceAll(">","&gt;")
 	}
 
-	private def surroundByBlockquoteTAG(doc:String, regex:String, TAG:String):String = {
-	  val p = new Regex(regex, "before","inTAG","midInTag","following")
-	  val m = p findFirstMatchIn(doc)
+	def surroundByBlockquoteTAG(doc:String, regex:Regex, TAG:String):String = {
+	  val m = regex findFirstMatchIn(doc)
 	  log debug "[" + doc + "]"
 
 	  var bef = ""
@@ -1018,9 +1006,8 @@ class BQParser {
 	  doc
 	}
 
-	private def surroundByListTAG(doc:String, regex:String, TAG:String):String = {
-		val p = new Regex(regex, "before","elements","element","following")
-	  	val m = p findFirstMatchIn(doc)
+	def surroundByListTAG(doc:String, regex:Regex, TAG:String):String = {
+	  	val m = regex findFirstMatchIn(doc)
 		var s = ""
 		var bef = ""
 		var fol = ""
@@ -1131,12 +1118,11 @@ class BQParser {
 	  	}else{doc}
 	}
 
-	private def surroundByHeadTAGUnderlineStyle(doc:String, regex:String, TAG:String):String = {
+	def surroundByHeadTAGUnderlineStyle(doc:String, regex:Regex, TAG:String):String = {
 	  if(doc == ""){return doc}
 
 	  log debug "-->" + doc
-	  val p = new Regex(regex, "before","inTAG","id","style","following")
-	  val m = p findFirstMatchIn(doc)
+	  val m = regex findFirstMatchIn(doc)
 	  var bef = ""
 	  var fol = ""
 	  var contentStr = ""
@@ -1164,12 +1150,11 @@ class BQParser {
 	  doc
 	}
 
-	private def surroundByHeadTAG(doc:String, regex:String, TAG:String):String = {
+	def surroundByHeadTAG(doc:String, regex:Regex, TAG:String):String = {
 	  	if(doc == ""){return doc}
 
 	  	log debug "--> " + doc
-	  	val p = new Regex(regex, "before","startHead","inTAG","endHead","id","following")
-		val m = p findFirstMatchIn(doc)
+		val m = regex findFirstMatchIn(doc)
 	  	var contentStr = ""
 
 		if(m != None){
@@ -1205,11 +1190,10 @@ class BQParser {
 	  doc
 }
 
-	private def surroundByGeneralTAG(doc:String, regex:String, TAG:String):String = {
+	def surroundByGeneralTAG(doc:String, regex:Regex, TAG:String):String = {
 	  if(doc == ""||Option(doc) == None){return ""}
 	  log debug doc
-	  val p = new Regex(regex,"before","inTAG","following")
-	  val m = p findFirstMatchIn(doc)
+	  val m = regex findFirstMatchIn(doc)
 	  if(m != None){
 	      var bef = ""
 	      var fol = ""
@@ -1246,12 +1230,14 @@ class BQParser {
 	  	val bodyTAG = "body"
 	  	val htmlTAG = "html"
 	  	var md = preProcessors(markdown + "\\,")
-	  	val l = md.length()
-		for(k <- Syntax keys){
-		 md = Syntax(k)._2(md, k, Syntax(k)._1)
-		 log debug  Syntax(k)._1 + "***" + md
-		}
-	  	//log info md
+
+        for(k <- Syntax keys){
+          val start = System.currentTimeMillis()
+          md = Syntax(k)._2(md, k, Syntax(k)._1)
+          log debug k + " :::: " + (System.currentTimeMillis() - start) + " msec"
+        }
+
+	  	log debug md
 		md = backslashEscape(md)
 		md = paragraphize(md)
 	  	log debug urlDefMap
@@ -1259,6 +1245,7 @@ class BQParser {
 	  	md += insertFootnoteDefinitions(footnoteMap)
 	  	val header = constructHEADER(markdown)
 		s"${docType}\n${header}\n<${htmlTAG}>\n<${bodyTAG}>\n${md.replaceAll("\\\\,","\n")}\n</${bodyTAG}>\n</${htmlTAG}>"
+
 	}
 
 	def toDOM(markdown:String):org.w3c.dom.Document = {
@@ -1272,47 +1259,79 @@ class BQParser {
 
 
 	private def paragraphize(doc:String):String = {
-		if(doc == ""){return ""}
-		var text = ListBuffer.empty[String]
-		val textList = doc.split("""\\,""")
+	  if(doc == ""){return ""}
+	  val BlockElem = new HTMLMap BLOCKTags
+	  val InlineElem = new HTMLMap INLINETags
+	  var tag = ""
+	  val blockElements = Stack.empty[String]
 
-		val BlockElem = new HTMLMap BLOCKTags
-		var tag = ""
-		val blockElements = Stack.empty[String]
-		var blockDepth = 0
-
-		for(l <- textList){
-			if( blockElements.size > 0 ){
-				val pb = s"""</${blockElements.top}>""".r
-				val mb = pb findFirstMatchIn(l)
-
-				if(l != ""){text += l}
-				if(mb != None){
-					blockElements.pop
-				}
-			}else{
-				val p = """<([\w\d]+).*?>""".r
-				val m = p findFirstMatchIn(l)
-
-				if(m != None){
-					tag = m.get.group(1)
-					if(BlockElem contains(tag)){
-					  val pe = s"""</$tag>""".r
-					  val me = pe findFirstMatchIn(l)
-					  if(me == None){
-						 blockElements.push(tag)
-					  }
-					  if(l != ""){text += l}
-					}else{
-					  if(l != ""){text += "<p>" + l + "</p>"}
-					}
-				}else{
-				  if(l != ""){text += "<p>" + l + "</p>"}
+	  def _paragraphize(strList:List[String],TAG:String):List[String] = {
+			if(strList.isEmpty){return strList}
+			log debug ">>> " + strList.head
+		  	val p = """<([\w\d]+)\s?.*?>""".r
+			val m = p findFirstMatchIn(strList.head)
+			if(m != None && BlockElem.contains(m.get.group(1))){
+				val pe = s"""</${m.get.group(1)}>""".r
+				val me = pe findFirstMatchIn(strList.head)
+				if(me == None){
+					blockElements.push(m.get.group(1))
 				}
 			}
-		}
-	  text mkString("""\,""")
 
+			if(blockElements.size > 0){
+		  	     val pb = s"""</${blockElements.top}>""".r
+		  	     val mb = pb findFirstMatchIn(strList.head)
+
+		  	     if(mb != None){
+		  	    	 if(!strList.head.isEmpty()){
+		  	    	    log debug "0.1: " + blockElements + " : " +  strList.head
+		  	    		return strList.head::_paragraphize(strList.tail,blockElements.pop)
+		  	    	 }
+		  	     }else{
+		  	       if(!strList.head.isEmpty()){
+		  	    	    log debug "0.2: "  + blockElements + " : " +  strList.head
+		  	    		return strList.head::_paragraphize(strList.tail,"")
+		  	    	 }
+		  	     }
+			}
+
+			if(m != None){
+		  	  tag = m.get.group(1)
+		  	  log debug "tag = " + tag + "****"
+		  	  if(BlockElem contains(tag)){
+				val pe = s"""</$tag>""".r
+				val me = pe findFirstMatchIn(strList.head)
+				if(me == None){
+				  blockElements.push(tag)
+				}
+		  	  	if(!strList.head.isEmpty()){
+		  	  	    log debug "1: " + blockElements + " : " + strList.head
+		  	  		return strList.head::_paragraphize(strList.tail,tag)
+		  	  	}
+		  	  }else{
+		  	    if(blockElements.size > 0){
+		  	      if(!strList.head.isEmpty()){
+		  		    log debug "2.1: " + blockElements + " : " +  strList.head
+		  	        return  strList.head::_paragraphize(strList.tail,tag)
+		  	     }
+		  	    }else{
+		  	      if(!strList.head.isEmpty()){
+		  		    log debug "2.2: <p>" + blockElements + " : " + strList.head
+		  	        return "<p>" + strList.head + "</p>" ::_paragraphize(strList.tail,"")
+		  	     }
+		  	    }
+
+		  	  }
+		  	}else{
+		  	      if(!strList.head.isEmpty()){
+		  	        log debug "3: " + "<p> :" + blockElements + " : " + strList.head
+		  	        return "<p>" + strList.head + "</p>" ::_paragraphize(strList.tail,tag)
+		  	     }
+		  	  }
+
+		  return _paragraphize(strList.tail,"")
+	  }
+	  return _paragraphize(doc.split("""\\,""").toList,"").mkString("""\,""")
 	}
 
 	private def backslashEscape(doc:String):String = {
