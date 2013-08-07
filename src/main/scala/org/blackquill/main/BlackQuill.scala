@@ -12,12 +12,13 @@ import org.blackquill.engine._
 import org.blackquill.io._
 
 import java.io.PrintWriter
+import java.io.File
 
 object BlackQuill{
   private val log:Log = LogFactory.getLog(BlackQuill.getClass)
 
-  val VERSION = "0.1.0"
-  val lastDate = "july 25 2013"
+  val VERSION = "0.1.1"
+  val lastDate = "August 7 2013"
 
   val wiki = "https://www.setminami.net/BlackQuill/"
   val syntax = "index.html#Syntax"
@@ -91,52 +92,76 @@ object BlackQuill{
   }
 
   def main(args:Array[String]){
-    val sufRegex = """(\.md$)|(\.markdown$)|(\.txt$)|(\.bq$)|(\.blackquill$)""".r
+    val sufRegex = """\.(md|markdown|txt|bq|blackquill)$$""".r
     val start = System.currentTimeMillis()
-    
-    try{
-      val it = args.iterator
+
+    val it = args.iterator
       for(elem <- it){
-        log.debug("=>" + elem.toString)
-        elem.toString() match {
-          case "--force"|"-f" => Switches.setForce(true)
-          case "--stdout"|"-s" => Switches.setStdout(true)
-          case "--enc" => Switches.setEncoding(true,it.next.toString)
-          case "--output" => Switches.setOutput(true,it.next.toString)
-          case "--verbose"|"-v" => Switches.setVerbose(true)
-          case "--version" => log.info("BlackQuill Version" + VERSION + " updated at " + lastDate)
-          case "--help"|"-h" =>
-            println(description)
-          case _ =>
-            if(sufRegex.findFirstIn(elem.toString) != None){
-              Switches.setInputfile(elem.toString)
-            }else{
-              throw new RuntimeException
+        log debug "=>" + elem.toString
+        if(elem.startsWith("--")){
+          elem.toString() match {
+            case "force" => Switches.setForce(true)
+            case "stdout" => Switches.setStdout(true)
+            case "enc" => Switches.setEncoding(true,it.next.toString)
+            case "output" => Switches.setOutput(true,it.next.toString)
+            case "verbose" => Switches.setVerbose(true)
+            case "version" => log.info("BlackQuill Version" + VERSION + " updated at " + lastDate)
+            case "help" =>
+              println(description)
+            case _ => log warn "Wrong switch is found.";exit()
+          }
+        }else if(elem.startsWith("-")){
+          for(e <- elem){
+            e match {
+              case '-' => print()
+              case 'f' => Switches.setForce(true)
+              case 's' => Switches.setStdout(true)
+              case 'v' => Switches.setVerbose(true)
+              case _ => log warn "Wrong Switch is found.";exit()
             }
+          }
+        }else{
+          if(elem == "org.blackquill.main"){
+            println()
+          }else if(sufRegex.findFirstMatchIn(elem.toString) != None){
+            Switches.setInputfile(elem.toString)
+          }else {
+            log warn "inputfile suffix is wrong. => .md|.markdown|.txt|.bq|.blackquill"
+          }
         }
       }
-    }catch{ case e:Exception => log.warn("wrong switch is found see --help or Website\n" + wiki)}
-    val fileHandler = FileIO
-    // - fileHandler.openMarkdownFromString(str:String)
-    log info "prepared " + (System.currentTimeMillis() - start) + " msec"
-    val text:List[String] = fileHandler openMarkdownFromFile(Switches.getInputfile)
-    val output = blackquill(new HTMLMap().specialCharConvert(text))
-    log info "generate HTML " + (System.currentTimeMillis() - start) + " msec"
-    Switches.outputFile = sufRegex.replaceAllIn(Switches.getInputfile,".html")
-    val out = new PrintWriter(Switches.dirName + Switches.outputFile)
-    //log info output
-    output.foreach(out.print(_))
-    out.close
-    log info (System.currentTimeMillis() - start) + " msec"
+      val fileHandler = FileIO
+      Switches.outputFile = sufRegex.replaceAllIn(Switches.getInputfile,".html")
+      val iCheck = new File(Switches.getInputfile)
+      val oCheck = new File(Switches.outputFile)
+      // - fileHandler.openMarkdownFromString(str:String)
+      if(Switches.getForce || !oCheck.exists ||oCheck.lastModified < iCheck.lastModified){
+        val text:List[String] = fileHandler openMarkdownFromFile(Switches.getInputfile)
+        val output = blackquill(new HTMLMap().specialCharConvert(text))
+        if(Switches.getVerbose){
+         log info "generate HTML " + (System.currentTimeMillis() - start) + " msec"
+        }
+        val out = new PrintWriter(Switches.dirName + Switches.outputFile)
+        //log info output
+        output.foreach(out.print(_))
+        out.close
+        if(Switches.getVerbose){
+          log info (System.currentTimeMillis() - start) + " msec"
+        }
+      }
   }
 
   def blackquill(lines:List[String]):List[String] = {
     val start = System.currentTimeMillis()
     val str = new HTMLMap htmlTAGFilter lines.mkString("""\,""")
-    log info "TAGFiltered " + (System.currentTimeMillis() - start) + " msec"
+    if(Switches.getVerbose){
+      log info "TAGFiltered " + (System.currentTimeMillis() - start) + " msec"
+    }
     log debug str
     val HTML = new BQParser toHTML(str)
-    log info "toHTML " + (System.currentTimeMillis() - start) + " msec"
+    if(Switches.getVerbose){
+      log info "toHTML " + (System.currentTimeMillis() - start) + " msec"
+    }
     log debug HTML
     if(Switches.getStdout){
       println(HTML)

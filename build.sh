@@ -1,6 +1,6 @@
 #!/bin/sh
 if which sbt>/dev/null ; then
-	sbt compile ; sbt assembly
+	sbt clean; sbt compile ; sbt assembly
 else
 	echo "sbt is not installed in this system."
 fi
