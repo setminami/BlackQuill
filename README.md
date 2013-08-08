@@ -24,3 +24,6 @@ OK, you can use BlackQuill.
 e.g.,)
 
     $BlackQuill --help
+
+
+see [also](http://www.setminami.net/BlackQuill)

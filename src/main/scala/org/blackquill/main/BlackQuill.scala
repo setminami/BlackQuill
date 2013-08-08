@@ -107,7 +107,7 @@ object BlackQuill{
             case "--verbose" => Switches.setVerbose(true)
             case "--version" => log.info("BlackQuill Version" + VERSION + " updated at " + lastDate)
             case "--help" =>
-              println(description)
+              log info description;exit
             case _ => log warn s"Wrong switch is found. $elem";exit()
           }
         }else if(elem.startsWith("-")){
