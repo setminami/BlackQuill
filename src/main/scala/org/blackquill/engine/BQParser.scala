@@ -113,7 +113,7 @@ class BQParser {
 			if(m3 != None){
 				return fencedBox(m2.get.group(2),regex,TAG)
 			}else{
-				return m2.get.group(1) + "</div>" + _searchEndMark(m2.get.group(2),regex,TAG)
+				return m2.get.group(1) + "\\,</div>\\," + _searchEndMark(m2.get.group(2),regex,TAG)
 			}
 		}//else{
 			//log error "fenced box ERROR: not Found break Mark"
@@ -940,9 +940,9 @@ class BQParser {
 
 		  log debug contentStr
 		  return surroundByPreCodeTAG(bef,regex,TAG) +
-				  s"<pre><$TAG>" +
+				  s"""\\,<pre><$TAG>\\,""" +
 				  ltgtExpand(contentStr) +
-				  s"</$TAG></pre>\\," +
+				  s"""\\,</$TAG></pre>\\,""" +
 				  surroundByPreCodeTAG(fol, regex, TAG)
 		}
 

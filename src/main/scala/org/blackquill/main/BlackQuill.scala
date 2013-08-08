@@ -18,7 +18,7 @@ object BlackQuill{
   private val log:Log = LogFactory.getLog(BlackQuill.getClass)
 
   val VERSION = "0.1.2"
-  val lastDate = "August 8 2013"
+  val lastDate = "Augus 8 2013"
 
   val wiki = "https://www.setminami.net/BlackQuill/"
   val syntax = "index.html#Syntax"
