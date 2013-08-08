@@ -147,7 +147,10 @@ object BlackQuill{
         out.close
         if(Switches.getVerbose){
           log info (System.currentTimeMillis() - start) + " msec"
+          log info output.size
         }
+      }else{
+        log warn "The MarkDown file is not changed. (see also --help)"
       }
   }
 
