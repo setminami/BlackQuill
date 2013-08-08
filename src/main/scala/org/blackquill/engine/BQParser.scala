@@ -694,7 +694,7 @@ class BQParser {
 		if(m != None){
 			val fileName = m.get.group(1)
 			val CSSHandler = FileIO
-			val CSS = CSSHandler openCSSFile(fileName) mkString("")
+			val CSS = CSSHandler openCSSFile(fileName,BlackQuill.Switches.getEncoding) mkString("")
 			log debug CSS
 			for(line <- CSS.split("""\/\*.*?\*\/""")){
 				log debug "***" + line

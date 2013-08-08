@@ -17,24 +17,27 @@ object FileIO{
   private val log:Log = LogFactory.getLog(FileIO.getClass)
   private var baseDir = ""
 
-  def openMarkdownFromFile(fileName:String):List[String] = {
+  def openMarkdownFromFile(fileName:String,encoding:String):List[String] = {
     try{
         baseDir = FilenameUtils getFullPath fileName
-        FileUtils.readLines(new File(fileName)).toList
+        FileUtils.readLines(new File(fileName),encoding).toList
         }catch{
           case e:FileNotFoundException  =>
           log error "File Not Found :" + fileName
           exit(-1)
+          case e:IllegalArgumentException =>
+          log error "Illegal Char Code :" + encoding
+          exit()
         }
   }
 
-  def openCSSFile(fileName:String):List[String] = {
+  def openCSSFile(fileName:String,encoding:String):List[String] = {
     val p = """^(?i)(file:|http|\/|\w:\\).*$$""".r
     val m = p findFirstMatchIn(fileName)
     if(m != None){
-      openMarkdownFromFile(fileName)
+      openMarkdownFromFile(fileName,encoding)
     }else{
-      openMarkdownFromFile(baseDir + fileName)
+      openMarkdownFromFile(baseDir + fileName,encoding)
     }
   }
 

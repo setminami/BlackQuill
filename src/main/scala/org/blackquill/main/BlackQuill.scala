@@ -17,8 +17,8 @@ import java.io.File
 object BlackQuill{
   private val log:Log = LogFactory.getLog(BlackQuill.getClass)
 
-  val VERSION = "0.1.1"
-  val lastDate = "August 7 2013"
+  val VERSION = "0.1.2"
+  val lastDate = "August 8 2013"
 
   val wiki = "https://www.setminami.net/BlackQuill/"
   val syntax = "index.html#Syntax"
@@ -100,15 +100,15 @@ object BlackQuill{
         log debug "=>" + elem.toString
         if(elem.startsWith("--")){
           elem.toString() match {
-            case "force" => Switches.setForce(true)
-            case "stdout" => Switches.setStdout(true)
-            case "enc" => Switches.setEncoding(true,it.next.toString)
-            case "output" => Switches.setOutput(true,it.next.toString)
-            case "verbose" => Switches.setVerbose(true)
-            case "version" => log.info("BlackQuill Version" + VERSION + " updated at " + lastDate)
-            case "help" =>
+            case "--force" => Switches.setForce(true)
+            case "--stdout" => Switches.setStdout(true)
+            case "--enc" => Switches.setEncoding(true,it.next.toString)
+            case "--output" => Switches.setOutput(true,it.next.toString)
+            case "--verbose" => Switches.setVerbose(true)
+            case "--version" => log.info("BlackQuill Version" + VERSION + " updated at " + lastDate)
+            case "--help" =>
               println(description)
-            case _ => log warn "Wrong switch is found.";exit()
+            case _ => log warn s"Wrong switch is found. $elem";exit()
           }
         }else if(elem.startsWith("-")){
           for(e <- elem){
@@ -136,18 +136,36 @@ object BlackQuill{
       val oCheck = new File(Switches.outputFile)
       // - fileHandler.openMarkdownFromString(str:String)
       if(Switches.getForce || !oCheck.exists ||oCheck.lastModified < iCheck.lastModified){
-        val text:List[String] = fileHandler openMarkdownFromFile(Switches.getInputfile)
+        val text:List[String] = fileHandler openMarkdownFromFile(Switches.getInputfile,Switches.getEncoding)
         val output = blackquill(new HTMLMap().specialCharConvert(text))
         if(Switches.getVerbose){
          log info "generate HTML " + (System.currentTimeMillis() - start) + " msec"
         }
-        val out = new PrintWriter(Switches.dirName + Switches.outputFile)
+
+          val out:PrintWriter = if(Switches.getStdout){
+              new PrintWriter(System.err)
+            }else{
+              if(Switches.getOutput){
+                new PrintWriter(Switches.getOutputDir + Switches.outputFile,Switches.getEncoding)
+              }else{
+                new PrintWriter(Switches.dirName + Switches.outputFile,Switches.getEncoding)
+              }
+            }
         //log info output
         output.foreach(out.print(_))
         out.close
         if(Switches.getVerbose){
           log info (System.currentTimeMillis() - start) + " msec"
-          log info output.size
+          val chkdStr = if(oCheck.length > 1073741824){
+            oCheck.length/1073741824 + " GB"
+          }else if(oCheck.length > 1048576){
+            oCheck.length/1048576 + " MB"
+          }else if(oCheck.length > 1024){
+            oCheck.length/1024 + " KB"
+          }else{
+            oCheck.length + " B"
+          }
+          log info oCheck.getName() + " => " + chkdStr
         }
       }else{
         log warn "The MarkDown file is not changed. (see also --help)"
@@ -166,9 +184,6 @@ object BlackQuill{
       log info "toHTML " + (System.currentTimeMillis() - start) + " msec"
     }
     log debug HTML
-    if(Switches.getStdout){
-      println(HTML)
-    }
     HTML split """\,""" toList
   }
 
