@@ -372,7 +372,7 @@ class BQParser {
 			  log debug ulNest
 			}
 			toc += """</ul>\\,""" * ulNest
-			val head = putHeaderID(bef,minmax._1,minmax._2, 0)
+			val head = putHeaderID(bef,minmax._1,minmax._2)
 			val tail = putHeaderID(fol,minmax._1,minmax._2,bef.split("\\,").size)
 
 			val table = """<header>\\,<nav>\\,<ul style="list-style:none" id="toc">\\,""" + toc.mkString("") + "</ul>\\\\,</nav>\\\\,</header>\\\\,"
@@ -382,7 +382,7 @@ class BQParser {
 
 		doc
 	}
-	def putHeaderID(doc:String,min:Int,max:Int,indent:Int):String ={
+	def putHeaderID(doc:String,min:Int,max:Int,indent:Int=0):String ={
 		if(doc == ""){return ""}
 		var text = ""
 		for((e,i) <- doc.split("""\\,""").zipWithIndex){
