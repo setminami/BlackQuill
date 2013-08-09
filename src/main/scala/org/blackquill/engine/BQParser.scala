@@ -354,6 +354,7 @@ class BQParser {
 			}
 			headerMap = headerMap.reverse
 
+
 			var i = headerMap.head._2
 			var toc = ""
 			var ulNest = 0
@@ -367,16 +368,21 @@ class BQParser {
 			  }
 			  toc += s"""<li><a href="#${h._3}" >${h._4}</a></li>\\,"""
 			  i = h._2
+			  log debug toc
+			  log debug ulNest
 			}
+			toc += """</ul>\\,""" * ulNest
+			val head = putHeaderID(bef,minmax._1,minmax._2, 0)
+			val tail = putHeaderID(fol,minmax._1,minmax._2,bef.split("\\,").size)
 
-			val table = """<header>\\,<ul style="list-style:none" id="toc"><nav>\\,""" + toc.mkString("") + "</nav></ul>\\,</header>"
+			val table = """<header>\\,<nav>\\,<ul style="list-style:none" id="toc">\\,""" + toc.mkString("") + "</ul>\\\\,</nav>\\\\,</header>\\\\,"
 
-			return putHeaderID(bef,minmax._1,minmax._2) + table + putHeaderID(fol,minmax._1,minmax._2)
+			return  head + table + tail
 		}
 
 		doc
 	}
-	def putHeaderID(doc:String,min:Int,max:Int):String ={
+	def putHeaderID(doc:String,min:Int,max:Int,indent:Int):String ={
 		if(doc == ""){return ""}
 		var text = ""
 		for((e,i) <- doc.split("""\\,""").zipWithIndex){
@@ -386,8 +392,9 @@ class BQParser {
 		    log debug "###" + e
 		    if(m != None){
 		    	val header = m.get.group(1).toInt
-		    	if( header >= nRange._1 && header <= nRange._2){
-		    		val id = for(h<-headerMap if h._1 == i)yield{h._3}
+		    	log debug min +":"+max
+		    	if( header >= min && header <= max){
+		    		val id = for(h<-headerMap if h._1 == i + indent)yield{h._3}
 		    		text += s"""<h${header} id="${id.head}">${m.get.group(2)}</h$header>\\,"""
 		    	}else{
 		    	  text += e + """\\,"""
