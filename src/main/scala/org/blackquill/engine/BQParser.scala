@@ -69,7 +69,7 @@ class BQParser {
 	"^(.*)\\[(.+?)\\]\\[(.*?)\\](?:\\{(.+?)\\})?(.*)$$".r -> ("a",referenceExpander _),
 	"^(.*?)!\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?(?:\\x20+?(\\d+?%?)?x(\\d+?%?)?)?\\)(?:\\{(.+?)\\})?(.*)$$".r("before","alt","url","title","resX","resY","css","following")
 	-> ("img", putImgTAG _),
-	"^(.*?)\\[(.*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?\\)(?:\\{(.+?)\\})?(.*?)$$".r("before","inTag","link","title","css","following") -> ("a", surroundaHrefTAG _),
+	"^(.*?)\\[([^\\[]*?)\\]\\((.+?)\\x20*?(?:\"(.+?)\")?\\)(?:\\{(.+?)\\})?(.*?)$$".r("before","inTag","link","title","css","following") -> ("a", surroundaHrefTAG _),
 	"^(.*?\\\\,)((>\\s.*(?:\\\\,))+?)(.*?)$$".r("before","inTAG","midInTag","following") -> ("blockquote",surroundByBlockquoteTAG _),
 	"^(.*?)(((?:\\x20{4,}|\\t+)\\d+?\\.\\x20.+?\\\\,)+)(.*?)$$".r("before","elements","element","following") -> ("ol",surroundByListTAG _),
 	"^(.*?)(((?:\\x20{4,}|\\t+)(?:\\*|\\+|\\-)\\x20.+?\\\\,)+)(.*?)$$".r("before","elements","element","following") -> ("ul",surroundByListTAG _),
