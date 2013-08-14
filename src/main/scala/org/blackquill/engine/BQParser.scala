@@ -957,7 +957,7 @@ class BQParser {
 	}
 
 	def ltgtExpand(doc:String):String = {
-		return doc.replaceAll("&","&amp").replaceAll("<","&gt;").replaceAll(">","&gt;")
+		return doc.replaceAll("&","&amp").replaceAll("<","&lt;").replaceAll(">","&gt;")
 	}
 
 	def surroundByBlockquoteTAG(doc:String, regex:Regex, TAG:String):String = {
