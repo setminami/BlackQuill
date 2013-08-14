@@ -1,5 +1,5 @@
 ![BlackQuill](./BlackQuill.png)
-<h1>BlackQuill 0.1.2 released</h>
+<h1>BlackQuill pre alpha released</h>
 <br />
 <br />
 BlackQuill is an advanced markdown engine.
