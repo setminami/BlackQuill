@@ -527,7 +527,7 @@ class BQParser {
 			}
 			log debug (System.currentTimeMillis() - start).toString + " msec"
 			return fencedCode(bef,regex,"code") +
-				s"<pre $specialAttr><$TAG>\\\\," + ltgtExpand(inCode) + s"</$TAG></pre>" +
+				s"<pre $specialAttr><$TAG>\\\\," + /*ltgtExpand(inCode)*/inCode + s"</$TAG></pre>" +
 					fencedCode(fol,regex,TAG)
 		}else{return doc}
 
