@@ -17,7 +17,7 @@ import java.io.File
 object BlackQuill{
   private val log:Log = LogFactory.getLog(BlackQuill.getClass)
 
-  val VERSION = "0.1.5"
+  val VERSION = "0.1.6"
   val lastDate = "Augus 15 2013"
 
   val wiki = "https://www.setminami.net/BlackQuill/"
@@ -34,7 +34,6 @@ object BlackQuill{
     "--help|-h :output usage descriptions\n" +
     "...and  Markdown file's suffix is .md|.markdown|.txt|.bq|.BlackQuill\n" +
     "e.g., BlackQuill --force foo.md"
-
 
   val description = "Welcome to BlackQuill.\n" +
     "BQ switches=> \n" + options +

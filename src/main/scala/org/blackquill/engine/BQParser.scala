@@ -77,8 +77,8 @@ class BQParser {
 	"""^(.*?\\,)(.*?)(?:\{(.+?)\})?\\,(\-+|=+)\s*\\,(.*?)$$""".r("before","inTAG","id","style","following") -> ("h",surroundByHeadTAGUnderlineStyle _),//Speedup
 	"""^(.*?)(\{toc(:.+?)?\})(.*)$$""".r("before","toc","range","following") -> ("ul",generateTOC _),
 	"^(.*\\\\,)((?:\\-|\\*){3,}|(?:(?:\\-|\\*)\\x20){3,})(.*?)$$".r("before","line","following") -> ("hr",putHrTAG _),
-	"^(.*?)\\*\\*([^\\,]{1,64}?)\\*\\*(.*?)$$".r("before","inTAG","following") -> ("strong",surroundByGeneralTAG _),
-	"^(.*?)\\*([^\\,]{1,64}?)\\*(.*?)$$".r("before","inTAG","following") -> ("em",surroundByGeneralTAG _),
+	"^(.*?)\\*\\*([^\\,|\\s]{1,64}?)\\*\\*(.*?)$$".r("before","inTAG","following") -> ("strong",surroundByGeneralTAG _),
+	"^(.*?)\\*([^\\,|\\s]{1,64}?)\\*(.*?)$$".r("before","inTAG","following") -> ("em",surroundByGeneralTAG _),
 	"""^(.*?\\,)(%{1,6})\x20(.*?)(\\,.*?)$$""".r("before","hSize","inTAG","following") -> ("h", autoNumberingHeader _),
 	"""^(.*?\\,)(((?:\x20{4,}|\t+)(.*?\\,))+?)(.*?)$$""".r("before","seq","inTAG","midInTag","following") -> ("code",surroundByPreCodeTAG _)
 	//late
@@ -1222,7 +1222,7 @@ class BQParser {
 	  val m = p findFirstMatchIn(doc)
 	  if(m != None){title = m.get.group(1)}
 
-	  s"<${headTAG}>\n<${titleTAG}>${title}</${titleTAG}>\n</${headTAG}>"
+	  s"<${headTAG}>\n<${titleTAG}>${title}</${titleTAG}>\n</${headTAG}>\n"
 	}
 
 	def preProcessors(doc:String) :String = {

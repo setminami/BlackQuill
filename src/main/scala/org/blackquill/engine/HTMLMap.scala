@@ -19,7 +19,7 @@ class HTMLMap{
 
   val BLOCKTags = Set(
     "address","blockquote","center","div","dl","fieldset","form","h1","h2","h3","h4","h5","h6",
-    "header","noframes","noscript","ol","p","pre","table","ul")
+    "header","noframes","noscript","ol","p","pre","script","table","ul")
 
   private val HTMLTag = LinkedHashMap[String,(List[String],(String)=>String)](
     "hr"->Tuple2(List("xx"),passThrough _),
@@ -121,8 +121,8 @@ class HTMLMap{
     }
     str
   }
-  
-  
+
+
   def specialCharConvert(text:List[String]):List[String] = {
     if(text.isEmpty){return text}
     var str = text.head
