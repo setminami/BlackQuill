@@ -41,6 +41,7 @@ class BQParser {
 	private var urlDefMap = new HashMap[String,Tuple5[String,String,String,String,String]]
 	private var footnoteMap = new LinkedHashMap[String,Tuple2[String,String]]
 	private var headerMap = List[Tuple4[Int,Int,String,String]]()
+	private var abbrMap = new HashMap[String,String]
 
 	private var nRange = (-1,-1)
 	private var nStack = Stack[Tuple3[Int,Int,String]]()
@@ -1223,6 +1224,26 @@ class BQParser {
 	  if(m != None){title = m.get.group(1)}
 
 	  s"<${headTAG}>\n<${titleTAG}>${title}</${titleTAG}>\n</${headTAG}>\n"
+	}
+
+	def getAbNote(doc:String) :String = {
+		val p = """^(.*?)(\{abbrnote:(.*?)\})(.*?)$$""".r("before","abNote","abbrText","following")
+		val m = p findFirstMatchIn(doc)
+
+		if(m != None){
+			val bef = m.get.group("before")
+			val fol = m.get.group("following")
+			val file = m.get.group("abbrText")
+
+			val abbr = FileIO.openMarkdownFromFile(file,BlackQuill.Switches.getEncoding)
+			for(ab <- abbr){
+				val p2 = """^\*\[(.*?)\]:(.*?)\s*$$""".r
+				val m2 = p2 findFirstMatchIn(ab)
+
+			}
+		}
+
+		return doc
 	}
 
 	def preProcessors(doc:String) :String = {
