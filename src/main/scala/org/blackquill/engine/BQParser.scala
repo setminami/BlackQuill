@@ -1271,13 +1271,20 @@ class BQParser {
 		return (List[String](),doc)
 	}
 
+	def convertAbbreviations(doc:String) : String = {
+		var text = doc
+		for(a <- abbrMap keys){
+			text = text replaceAll(s"""[^</?]$a""",s"""<abbr title="${abbrMap(a)}">$a</abbr>""")
+		}
+		return text
+	}
+
 	def preProcessors(doc:String) :String = {
 	 var text = urlDefinitions(doc)
 	 text = gatheringFootnotesDefinition(text)
 	 text = autoNumberSetting(text)
 	 text = preprocessingAbbriviations(text)
-	 log info abbrMap
-	 text
+	 return convertAbbreviations(text)
 	}
 
 	def toHTML(markdown:String):String = {
