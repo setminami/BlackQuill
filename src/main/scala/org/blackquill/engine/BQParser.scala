@@ -1226,7 +1226,37 @@ class BQParser {
 	  s"<${headTAG}>\n<${titleTAG}>${title}</${titleTAG}>\n</${headTAG}>\n"
 	}
 
-	def getAbNote(doc:String) :String = {
+	def preprocessingAbbriviations(doc:String) : String = {
+		val (abList,text) = getAbNote(doc)
+		if(!abList.isEmpty){
+			 addAbbrs(abList)
+		}
+		return getAbbrs(text)
+	}
+
+	def getAbbrs(doc:String) : String = {
+		if( doc == ""){return ""}
+		val p = """^(.*?)\*\[(.*?)\]:(.*?)\,(.*)$$""".r("before","word","definition","following")
+		val m = p findFirstMatchIn(doc)
+		if(m != None){
+			val bef = m.get.group("before")
+			val fol = m.get.group("following")
+			abbrMap += m.get.group("word") -> m.get.group("definition")
+
+			return getAbbrs(bef) + getAbbrs(fol)
+		}
+		return doc
+	}
+
+	def addAbbrs(abList:List[String]): Unit = {
+		val p = """^\*\[(.*?)\]:(.*)$$""".r("word","definition")
+		for(l <- abList){
+			val m = p findFirstMatchIn(l)
+			abbrMap += m.get.group("word") -> m.get.group("definition")
+		}
+	}
+
+	def getAbNote(doc:String) :(List[String],String) = {
 		val p = """^(.*?)(\{abbrnote:(.*?)\})(.*?)$$""".r("before","abNote","abbrText","following")
 		val m = p findFirstMatchIn(doc)
 
@@ -1235,21 +1265,18 @@ class BQParser {
 			val fol = m.get.group("following")
 			val file = m.get.group("abbrText")
 
-			val abbr = FileIO.openMarkdownFromFile(file,BlackQuill.Switches.getEncoding)
-			for(ab <- abbr){
-				val p2 = """^\*\[(.*?)\]:(.*?)\s*$$""".r
-				val m2 = p2 findFirstMatchIn(ab)
-
-			}
+			return (FileIO.openMarkdownFromFile(file,BlackQuill.Switches.getEncoding),bef+fol)
 		}
 
-		return doc
+		return (List[String](),doc)
 	}
 
 	def preProcessors(doc:String) :String = {
 	 var text = urlDefinitions(doc)
 	 text = gatheringFootnotesDefinition(text)
 	 text = autoNumberSetting(text)
+	 text = preprocessingAbbriviations(text)
+	 log info abbrMap
 	 text
 	}
 
