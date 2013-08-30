@@ -1,0 +1,19 @@
+{SlideShow:numbered[lower right]}
+{Theme:moon}
+
+---[Cover:center]---
+# This is Cover
+## This is subtitle
+<br><br>
+[author/address]
+---[page1:left]---
+# Title1
+    * item1
+        - item
+    * item2
+    * item3
+---[page2:left]---
+aaaaaa
+bbbbbb
+cccccc
+---[page3:center]---
