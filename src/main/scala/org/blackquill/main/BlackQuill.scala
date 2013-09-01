@@ -26,6 +26,7 @@ object BlackQuill{
 
   val options =
     "--force|-f : Force conversion. BQ ignore timestamps of markdown files.\n" +
+    "--slideshow : markdown text are processed as Slideshow format using reveal.js.\n" +
     "--stdout|-s :BQ outputs document to STDOUT as HTML.\n" +
     "--enc shift-jis|euc-jp|UTF-8|ASCII default input enc is UTF-8\n" +
     "--output DIR|-o :BQ outputs HTML to under DIR\n" +
@@ -47,6 +48,8 @@ object BlackQuill{
 
     def setForce(b:Boolean){force = b}
     def getForce:Boolean={force}
+    def getSlideshow:Boolean={slideshow}
+    def setSlideshow(b:Boolean){slideshow = b}
     def setStdout(b:Boolean){stdout = b}
     def getStdout:Boolean={stdout}
     def setStdin(b:Boolean){stdin = b}
@@ -70,6 +73,7 @@ object BlackQuill{
       verbose = false
       encFlag = false
       encode = "UTF-8"
+      slideshow = false
     }
 
     var outputFile = ""
@@ -88,6 +92,7 @@ object BlackQuill{
     var verbose = false
     var encFlag = false
     var encode = "UTF-8"
+    var slideshow = false
   }
 
   def main(args:Array[String]){
@@ -100,6 +105,7 @@ object BlackQuill{
         if(elem.startsWith("--")){
           elem.toString() match {
             case "--force" => Switches.setForce(true)
+            case "--slideshow" => Switches.setSlideshow(true)
             case "--stdout" => Switches.setStdout(true)
             case "--enc" => Switches.setEncoding(true,it.next.toString)
             case "--output" => Switches.setOutput(true,it.next.toString)

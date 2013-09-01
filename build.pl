@@ -43,3 +43,7 @@ if (-e $jarFile) {
 }else{
 	print "executable jar file not found." . "\n";
 }
+if(-e "reveal.js"){`rm -rf reveal.js`;}
+`git clone https://github.com/hakimel/reveal.js.git`;
+chdir("reveal.js");
+`git checkout refs/tags/2.5.0`;
